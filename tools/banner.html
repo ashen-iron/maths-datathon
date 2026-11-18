@@ -40,14 +40,31 @@
 <script>
   const q = JSON.parse(decodeURIComponent(location.search.slice(1) || '%7B%7D'));
   if (q.social) document.body.classList.add('social');
-  document.getElementById('stats').innerHTML = [
-    ['30', 'Players'], [q.xbar, 'Mean runs'], ['F = ' + q.F, 'ANOVA'], ['<i>η</i>² = ' + q.eta2, 'Role effect']
-  ].map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('');
-  // hairline bell curve
-  const svg = document.getElementById('curve'); let s = '<defs><linearGradient id="g" gradientUnits="userSpaceOnUse" x1="0" y1="230" x2="0" y2="40"><stop offset="0" stop-color="#C9A35A" stop-opacity=".95"/><stop offset="1" stop-color="#F3E3BF" stop-opacity=".25"/></linearGradient></defs>';
+  const stats = q.vol === 2
+    ? [[q.xbar, 'Mean strike rate'], [q.X + '/30', 'At par or better'], ['p = ' + q.p, 't test vs 120'], [q.power, 'Power at Δ = 5']]
+    : [['30', 'Players'], [q.xbar, 'Mean runs'], ['F = ' + q.F, 'ANOVA'], ['<i>η</i>² = ' + q.eta2, 'Role effect']];
+  if (q.vol === 2) {
+    document.querySelector('.kicker').textContent = 'MFAD Datathon · Problem Statement 2 · Dataset 13 · Volume II';
+    document.querySelector('h1').innerHTML = 'Pace, Par<br>&amp; <em>Power</em>';
+  }
+  document.getElementById('stats').innerHTML = stats.map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('');
+  // hairline art: a bell curve (Volume I) or repeated-sample confidence intervals (Volume II)
+  const svg = document.getElementById('curve');
+  if (q.vol === 2) {
+    let r = 7, t = '';
+    const rnd = () => ((r = (r * 16807) % 2147483647) / 2147483647);
+    for (let i = 0; i < 48; i++) {
+      const c = 120 + (rnd() + rnd() + rnd() - 1.5) * 6, h = 34 + rnd() * 14, x = 8 + i * 11.4, miss = i === 17 || i === 36;
+      const cy = miss ? 120 + (i === 17 ? -50 : 48) : 120 + (c - 120) * 6;
+      t += `<line x1="${x}" x2="${x}" y1="${cy - h}" y2="${cy + h}" stroke="${miss ? '#DD7894' : 'url(#g2)'}" stroke-width="${miss ? 2.2 : 1.6}" stroke-linecap="round"/><circle cx="${x}" cy="${cy}" r="1.8" fill="${miss ? '#DD7894' : '#F3EBDD'}"/>`;
+    }
+    svg.innerHTML = '<defs><linearGradient id="g2" gradientUnits="userSpaceOnUse" x1="0" y1="40" x2="0" y2="200"><stop offset="0" stop-color="#C9A35A"/><stop offset=".5" stop-color="#E7CF9A"/><stop offset="1" stop-color="#C9A35A"/></linearGradient></defs>' +
+      t + '<line x1="0" x2="560" y1="120" y2="120" stroke="#F3EBDD" stroke-opacity=".8"/>';
+  } else { let s = '<defs><linearGradient id="g" gradientUnits="userSpaceOnUse" x1="0" y1="230" x2="0" y2="40"><stop offset="0" stop-color="#C9A35A" stop-opacity=".95"/><stop offset="1" stop-color="#F3E3BF" stop-opacity=".25"/></linearGradient></defs>';
   let d = '';
   for (let i = 0; i <= 560; i += 3.2) { const z = (i - 280) / 92, h = Math.exp(-z * z / 2) * 190; s += `<line x1="${i}" x2="${i}" y1="230" y2="${230 - h}" stroke="url(#g)" stroke-width="1.1" opacity="${0.2 + 0.7 * Math.exp(-z * z / 2)}"/>`; d += (i ? 'L' : 'M') + i + ',' + (229.5 - h); }
   s += `<path d="${d}" fill="none" stroke="#E7CF9A" stroke-width="1.2"/><line x1="0" x2="560" y1="230" y2="230" stroke="#C9A35A" stroke-opacity=".6"/>`;
   svg.innerHTML = s;
+  }
 </script>
 </body></html>

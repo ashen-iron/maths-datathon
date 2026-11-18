@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pace, Par &amp; Power · MFAD Datathon · Volume II</title>
+<meta name="description" content="Volume II of the Dataset 13 study: strike rate as a random variable, binomial modelling, normal maximum likelihood, a 95% confidence interval, a one-sample t test against par, and power.">
+<meta name="theme-color" content="#07090D">
+<meta property="og:title" content="Pace, Par & Power">
+<meta property="og:description" content="MFAD Datathon · Problem Statement 2 · Dataset 13: how fast do thirty cricketers score?">
+<meta property="og:image" content="assets/img/banner-ps2.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%2307090D' stroke='%23C9A35A' stroke-width='2'/%3E%3Ctext x='32' y='43' font-family='Georgia' font-style='italic' font-size='32' fill='%23E6CC94' text-anchor='middle'%3Em%3C/text%3E%3C/svg%3E">
+<link rel="preload" href="assets/fonts/CormorantGaramond-300-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/Jost-200-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/fonts.css">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+<div class="progress" aria-hidden="true"></div>
+<div class="tt" role="status" aria-live="polite"></div>
+
+<!-- ═══════════════ NAV ═══════════════ -->
+<header class="nav" id="nav">
+  <div class="wrap">
+    <div class="brand-wrap">
+      <a class="brand" href="#top" aria-label="Back to top"><span class="seal">m</span><span class="txt">MFAD · Datathon</span></a>
+      <nav class="vols" aria-label="Volumes"><a href="index.html" title="Volume I · Runs, Roles &amp; Randomness">I</a><a class="on" href="ps2.html" aria-current="page" title="Volume II · Pace, Par &amp; Power">II</a></nav>
+    </div>
+    <nav class="links" aria-label="Chapters">
+      <a href="#study">The Study</a><a href="#binomial">Binomial</a><a href="#likelihood">Likelihood</a>
+      <a href="#interval">Interval</a><a href="#test">Test</a><a href="#power">Power</a><a href="#verdict">Verdict</a>
+    </nav>
+    <div style="display:flex;gap:10px;align-items:center">
+      <a class="btn small" href="downloads/MFAD_Datathon_Report_PS2.pdf" target="_blank" rel="noopener">Report
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4v12m0 0l-5-5m5 5l5-5M5 20h14"/></svg></a>
+      <button class="menu-btn" aria-label="Open menu" aria-expanded="false"><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero" id="top">
+  <canvas id="loom" aria-hidden="true"></canvas>
+  <svg class="rings" viewBox="0 0 200 200" aria-hidden="true">
+    <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E6CC94"/><stop offset="1" stop-color="#8C6A2E"/></linearGradient></defs>
+    <g fill="none" stroke="url(#rg)">
+      <circle cx="100" cy="100" r="98" stroke-opacity=".10" stroke-width=".18"/>
+      <circle cx="100" cy="100" r="82" stroke-opacity=".14" stroke-width=".18" stroke-dasharray=".6 1.4"/>
+      <circle cx="100" cy="100" r="64" stroke-opacity=".18" stroke-width=".18"/>
+      <circle cx="100" cy="100" r="46" stroke-opacity=".22" stroke-width=".18"/>
+      <circle cx="100" cy="100" r="30" stroke-opacity=".26" stroke-width=".18"/>
+      <rect x="97.4" y="87" width="5.2" height="26" stroke-opacity=".45" stroke-width=".22"/>
+      <path d="M95.5 90.5h9M95.5 109.5h9" stroke-opacity=".45" stroke-width=".18"/>
+      <path d="M100 2v196M2 100h196" stroke-opacity=".06" stroke-width=".15"/>
+    </g>
+  </svg>
+  <div class="wrap">
+    <div class="kicker">PES University · MFAD Datathon · Problem Statement 2 · Dataset 13 · Volume II</div>
+    <h1><span class="l"><span>Pace, Par</span></span><span class="l"><span>&amp; <em>Power</em></span></span></h1>
+    <p class="lede">How fast do thirty cricketers score? Strike rate examined through a binomial event, a normal likelihood, a confidence interval, a test against par, and the power behind that test.</p>
+    <div class="ctas">
+      <a class="btn" href="downloads/MFAD_Datathon_Report_PS2.pdf" target="_blank" rel="noopener">Read the report
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14m0 0l-6-6m6 6l-6 6"/></svg></a>
+      <a class="btn ghost" href="#study">Explore the findings</a>
+      <a class="btn ghost" href="index.html">← Volume I</a>
+    </div>
+    <div class="hero-stats">
+      <div><b data-count="121.93" data-dec="2">121.93</b><span>Mean strike rate</span></div>
+      <div><b><span data-count="18" data-dec="0">18</span>/30</b><span>At par or better</span></div>
+      <div><b>t = <span data-count="0.707" data-dec="3">0.707</span></b><span>Test against par 120</span></div>
+      <div><b><span data-count="0.424" data-dec="3">0.424</span></b><span>Power at Δ = 5</span></div>
+    </div>
+  </div>
+  <div class="live-badge" aria-live="off"><i></i>Live · <b id="loomRate">—</b> of intervals capture the mean</div>
+  <div class="scroll-cue" aria-hidden="true"></div>
+</section>
+
+<div class="marquee" aria-hidden="true"><div class="track" id="marquee">
+  <span><b>MLE mean</b><span class="hat">μ</span> = 121.93</span><span class="dot">✦</span>
+  <span><b>MLE variance</b><span class="hat">σ</span>² = 216.80</span><span class="dot">✦</span>
+  <span><b>95% CI</b>116.34 — 127.53</span><span class="dot">✦</span>
+  <span><b>t test</b>t(29) = 0.707, p = 0.485</span><span class="dot">✦</span>
+  <span><b>At par</b>X = 18 of 30</span><span class="dot">✦</span>
+  <span><b>Power</b>0.424 at Δ = 5</span><span class="dot">✦</span>
+  <span><b>For 80% power</b>n = 73</span><span class="dot">✦</span>
+  <span><b>Resamples</b>B = 20,000</span><span class="dot">✦</span>
+</div></div>
+
+<main>
+<!-- ═══════════════ 0 · THE STUDY ═══════════════ -->
+<section class="chapter" id="study">
+  <div class="wrap">
+    <div class="ch-head">
+      <div class="numeral" aria-hidden="true">0</div>
+      <div data-reveal>
+        <div class="eyebrow">The study · Volume II</div>
+        <h2 class="display">Not how much, <em>but how fast</em></h2>
+        <p class="intro">Volume I asked how many runs these players score. Volume II asks a distinct question about scoring <em>pace</em>: Strike_Rate, the runs scored per 100 balls faced, ranging from 88.4 to 146.8 in this sample.</p>
+        <div class="vars"><span class="tag"><i></i>Strike_Rate · outcome</span><span class="tag"><i style="background:var(--bowl)"></i>Par 120 · pre-specified</span><span class="tag"><i style="background:var(--faint)"></i>Player_ID · excluded</span></div>
+      </div>
+    </div>
+
+    <div class="chart-card" data-reveal>
+      <div class="chart-head">
+        <div class="chart-title">The thirty, against par<small>Each dot is a player. The rose line marks the assumed par of 120 runs per 100 balls.</small></div>
+        <div class="legend"><span><i style="background:var(--bat)"></i>Batter</span><span><i style="background:var(--ar)"></i>All-rounder</span><span><i style="background:var(--bowl)"></i>Bowler</span></div>
+      </div>
+      <div class="chart" id="srSwarm"></div>
+      <div class="caption"><b>Figure</b>18 players strike at par or better. Nearly all of them are batters and all-rounders, a pattern that shapes every task below.</div>
+    </div>
+
+    <div class="grid-2 block">
+      <div class="callout" data-reveal><div class="eyebrow">Pre-specified benchmark</div>
+        <div class="prose"><p><strong>Assumed target, clearly labelled:</strong> μ₀ = 120 runs per 100 balls, which is 1.2 runs per ball or 7.2 runs per over, a conventional par for limited-overs batting. It was written into <code>analysis_ps2.py</code> <em>before</em> the data were loaded. It is an assumption, not a documented league figure, because the competition is not named.</p></div></div>
+      <div class="callout" data-reveal data-d="1"><div class="eyebrow">Limitations of the variable</div>
+        <div class="prose"><p>Balls faced, the reference period and the competition are not recorded. Bowlers’ strike rates may rest on few balls. All 30 players are included, so “the mean” refers to a squad with this 10/10/10 role mix.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ I · BINOMIAL ═══════════════ -->
+<section class="chapter" id="binomial">
+  <div class="wrap">
+    <div class="ch-head">
+      <div class="numeral" aria-hidden="true">I</div>
+      <div data-reveal>
+        <div class="eyebrow">Task 1 · Random variables &amp; binomial</div>
+        <h2 class="display">Par or better: <em>a coin it isn’t</em></h2>
+        <p class="intro"><strong>S</strong> is the strike rate of a randomly chosen player (continuous, S ≥ 0). <strong>B</strong> = 1{S ≥ 120} is Bernoulli(p). <strong>X</strong> = ΣB over n = 30 players counts the par-or-better players, with values 0–30. Could X be Binomial(30, p)?</p>
+      </div>
+    </div>
+
+    <div class="tiles" data-reveal>
+      <div class="tile"><div class="k">Observed count</div><div class="v">18<small>of 30</small></div><div class="d"><span class="hat">p</span> = 0.60; P(X = 18) = 0.147 under Bin(30, 0.6)</div></div>
+      <div class="tile"><div class="k">By role</div><div class="v">10 · 7 · 1</div><div class="d">Batters · all-rounders · bowlers, each out of 10</div></div>
+      <div class="tile"><div class="k">If p were constant</div><div class="v">0.0060</div><div class="d">P(all 10 batters at par); P(≤ 1 bowler) = 0.0017</div></div>
+      <div class="tile"><div class="k">Variance of X</div><div class="v">7.20 <small>vs</small> 3.00</div><div class="d">Binomial against the 10/10/10 quota design</div></div>
+    </div>
+
+    <div class="chart-card block" data-reveal>
+      <div class="chart-head">
+        <div class="chart-title">Binomial explorer<small>Move the threshold to redefine the event. Bars show Binomial(30, <span class="hat">p</span>), the ivory line is the quota-design distribution, and gold marks the observed X.</small></div>
+      </div>
+      <div class="slider-row">
+        <label><span class="top"><span class="ctl-label">Event threshold · <span class="nt">S ≥</span></span><span class="readout" id="thrV">120</span></span><input type="range" id="thr" min="90" max="145" step="1" value="120"></label>
+      </div>
+      <div class="grid-2" style="gap:28px">
+        <div class="chart" id="binPmf"></div>
+        <div class="chart" id="binRoles"></div>
+      </div>
+      <div class="live" id="binLive"></div>
+      <div class="note-live">The pre-specified threshold is 120 (par). Other thresholds are shown only to explore the model.</div>
+    </div>
+
+    <div class="grid-2 block">
+      <div data-reveal>
+        <h3 class="sub">The three <em>assumptions</em></h3>
+        <div class="prose">
+          <p><strong>Fixed trials:</strong> met, since n = 30 players each give one 0/1 outcome. <strong>Independence:</strong> uncertain, because sampling is undocumented and teammates share pitches and opposition. <strong>Constant p:</strong> violated, with 10/10, 7/10 and 1/10 by role. Under a constant p = 0.60, a group of 10 would land in the range 3–9.</p>
+        </div>
+      </div>
+      <div class="prose" data-reveal data-d="1">
+        <h3 class="sub">The design <em>matters</em></h3>
+        <p>Because the sample fixes 10 players per role, X is a sum of three binomials with variance 3.00, not 7.20. A single binomial overstates the spread 2.4-fold. If players were drawn at random from the whole population, each would share the same <em>marginal</em> p and X would be binomial again. The fixed quotas break the model; the heterogeneity alone does not.</p>
+      </div>
+    </div>
+
+    <div class="reflect" data-reveal>
+      <div class="eyebrow">Reflection questions</div>
+      <details class="qa"><summary><span class="qn">1</span><span class="q">Why is the selected quantity appropriately represented as a random variable?</span><span class="pm"></span></summary>
+        <div class="a prose"><p>Before a player is selected, their strike rate is unknown. It varies between players and across seasons, and it assigns a number to each possible outcome of the selection, which is exactly what a random variable is. Treating S as random lets us describe its distribution, quantify uncertainty about its mean and test claims about it. B and X are random for the same reason: whether a selected player strikes at par is not known in advance.</p></div></details>
+      <details class="qa"><summary><span class="qn">2</span><span class="q">Which assumptions are needed for a binomial model, and how plausible are they here?</span><span class="pm"></span></summary>
+        <div class="a prose"><p>The model needs a fixed n (met), two outcomes per trial (met by construction), independent trials (uncertain) and a constant p (violated: 10/7/1 out of 10, with probabilities of 0.0060 and 0.0017 for the extreme counts under a common p). The binomial model therefore does not fit X as sampled. It would be reasonable within one role, or for a simple random sample from the whole population.</p></div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ II · LIKELIHOOD ═══════════════ -->
+<section class="chapter" id="likelihood">
+  <div class="wrap">
+    <div class="ch-head">
+      <div class="numeral" aria-hidden="true">II</div>
+      <div data-reveal>
+        <div class="eyebrow">Task 2 · Maximum likelihood</div>
+        <h2 class="display">The most <em>probable</em> normal</h2>
+        <p class="intro">Assume S₁, …, Sₙ are iid N(μ, σ²). With the data held fixed, the likelihood scores every candidate (μ, σ²). Its peak gives <span class="hat">μ</span> = <span class="bar">s</span> and <span class="hat">σ</span>² = (1/n)Σ(sᵢ − <span class="bar">s</span>)².</p>
+      </div>
+    </div>
+
+    <div class="tiles" data-reveal>
+      <div class="tile"><div class="k">MLE of the mean</div><div class="v">121.93</div><div class="d"><span class="hat">μ</span> = <span class="bar">s</span>; SE = <span class="hat">σ</span>/√n = 2.69</div></div>
+      <div class="tile"><div class="k">MLE of the variance</div><div class="v">216.80</div><div class="d">Divisor n (<span class="hat">σ</span> = 14.72); s² = 224.27</div></div>
+      <div class="tile"><div class="k">Maximised log-likelihood</div><div class="v">−123.25</div><div class="d">Confirmed numerically: 121.9333, 14.7241</div></div>
+      <div class="tile"><div class="k">Shapiro–Wilk</div><div class="v">p = 0.339</div><div class="d">W = 0.9615; skewness −0.513</div></div>
+    </div>
+
+    <div class="chart-card block" data-reveal>
+      <div class="chart-head">
+        <div class="chart-title">Likelihood explorer<small>Drag μ and σ. The curve shows your candidate normal and the map shows where it sits on the log-likelihood surface.</small></div>
+        <button class="btn small ghost" id="snapMle">Snap to MLE</button>
+      </div>
+      <div class="slider-row">
+        <label><span class="top"><span class="ctl-label">Mean <span class="nt">μ</span></span><span class="readout" id="muV">115.0</span></span><input type="range" id="muS" min="105" max="140" step="0.1" value="115"></label>
+        <label><span class="top"><span class="ctl-label">SD <span class="nt">σ</span></span><span class="readout" id="sgV">22.0</span></span><input type="range" id="sgS" min="7" max="30" step="0.1" value="22"></label>
+      </div>
+      <div class="grid-2" style="gap:28px">
+        <div class="chart" id="likFit"></div>
+        <div class="chart" id="likMap"></div>
+      </div>
+      <div class="live" id="likLive"></div>
+    </div>
+
+    <div class="grid-2 block">
+      <div class="test" data-reveal>
+        <div class="th"><b>Shapiro–Wilk test · Strike_Rate</b><span>Task 2 · assumption check</span></div>
+        <dl>
+          <dt>Hypotheses</dt><dd>H₀: Strike_Rate is normally distributed. H₁: it is not.</dd>
+          <dt>Level</dt><dd><span class="n">α = 0.05</span></dd>
+          <dt>Statistic</dt><dd><span class="n">W = 0.9615</span> · n = 30 (no df for W)</dd>
+          <dt>p-value</dt><dd><span class="n">p = 0.339</span></dd>
+          <dt>Decision</dt><dd><span class="chip keep">Fail to reject H₀</span></dd>
+          <dt>Conclusion</dt><dd>There is no evidence against normality. The mild left skew comes from the bowlers. This supports the normal model, but power is limited at n = 30.</dd>
+        </dl>
+      </div>
+      <div data-reveal data-d="1">
+        <h3 class="sub">MLE versus <em>other estimators</em></h3>
+        <div class="tbl-wrap"><table class="lux"><thead><tr><th>Estimator</th><th>Estimate</th><th>Property</th></tr></thead><tbody>
+          <tr class="hl"><td>MLE <span class="hat">μ</span> (= <span class="bar">s</span>)</td><td>121.93</td><td>Efficient under normality</td></tr>
+          <tr><td>Median</td><td>123.55</td><td>Robust</td></tr>
+          <tr><td>10% trimmed mean</td><td>122.86</td><td>Compromise</td></tr>
+          <tr class="hl"><td>MLE <span class="hat">σ</span>² (divisor n)</td><td>216.80</td><td>Bias ≈ −7.48</td></tr>
+          <tr><td>Unbiased s² (n − 1)</td><td>224.27</td><td>Unbiased</td></tr>
+          <tr><td>(1.4826 × MAD)²</td><td>158.8</td><td>Robust</td></tr>
+        </tbody></table></div>
+        <div class="prose" style="margin-top:18px"><p>MLE needs a full model and makes the observed data most probable. It is consistent, asymptotically efficient and invariant. Unbiased estimators target E[<span class="hat">θ</span>] = θ, and robust ones trade efficiency for resistance to outliers. The role-specific MLEs (batters 135.1, all-rounders 124.7, bowlers 106.0) show that the “identically distributed” assumption is strained.</p></div>
+      </div>
+    </div>
+
+    <div class="reflect" data-reveal>
+      <div class="eyebrow">Reflection questions</div>
+      <details class="qa"><summary><span class="qn">1</span><span class="q">What does the likelihood represent when the observations are fixed?</span><span class="pm"></span></summary>
+        <div class="a prose"><p>It becomes a function of the <em>parameters</em>. For each candidate (μ, σ²) it measures how probable, or more strictly how dense, the data actually observed would be. It is not a probability distribution over the parameters and need not integrate to 1. It ranks parameter values by how well they explain the fixed data. The explorer above shows this directly: moving away from the MLE lowers the log-likelihood.</p></div></details>
+      <details class="qa"><summary><span class="qn">2</span><span class="q">Which assumptions are important for normal maximum likelihood estimation?</span><span class="pm"></span></summary>
+        <div class="a prose"><p>Independence, so the likelihood factorises into a product. Identical distribution, so one μ and σ² apply to everyone; this is weak here because of the role differences. A normal form, supported by Shapiro–Wilk p = 0.339. A correctly specified model, because with a mixture the MLE estimates the closest normal, not the truth. And an n large enough for the asymptotic properties to hold; at n = 30, <span class="hat">σ</span>² is visibly biased downward by about −7.48.</p></div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ III · INTERVAL ═══════════════ -->
+<section class="chapter" id="interval">
+  <div class="wrap">
+    <div class="ch-head">
+      <div class="numeral" aria-hidden="true">III</div>
+      <div data-reveal>
+        <div class="eyebrow">Task 3 · 95% confidence interval</div>
+        <h2 class="display">A net cast <em>a hundred times</em></h2>
+        <p class="intro">σ is unknown and n = 30, so we use Student’s t with 29 df. The interval is <span class="bar">x</span> ± t*·s/√n, and its 95% describes how often the <em>method</em> succeeds.</p>
+      </div>
+    </div>
+
+    <div class="tiles" data-reveal>
+      <div class="tile"><div class="k">Standard error</div><div class="v">2.734</div><div class="d">s/√n = 14.98/√30</div></div>
+      <div class="tile"><div class="k">Critical value</div><div class="v">2.045</div><div class="d">t<sub>0.975, 29</sub> (z would be 1.960)</div></div>
+      <div class="tile"><div class="k">Margin of error</div><div class="v">5.59</div><div class="d">t* × SE, in runs per 100 balls</div></div>
+      <div class="tile"><div class="k">95% interval for μ</div><div class="v">116.34–127.53</div><div class="d">About 1.16–1.28 runs per ball</div></div>
+    </div>
+
+    <div class="chart-card block" data-reveal>
+      <div class="chart-head">
+        <div class="chart-title">Interval lab<small>Draw 100 samples from the data’s own distribution and build a t-interval for each. Gold intervals capture the true mean; rose intervals miss it.</small></div>
+        <button class="btn small" id="ciGo">Draw 100 samples</button>
+      </div>
+      <div class="controls">
+        <span class="ctl-label">Confidence</span>
+        <div class="seg" role="group" aria-label="Confidence level" id="ciLevel"><button aria-pressed="false" data-c="0.8">80%</button><button aria-pressed="false" data-c="0.9">90%</button><button aria-pressed="true" data-c="0.95">95%</button><button aria-pressed="false" data-c="0.99">99%</button></div>
+        <span class="ctl-label">Sample size</span>
+        <div class="seg" role="group" aria-label="Sample size" id="ciN"><button aria-pressed="false" data-n="10"><span class="nt">n</span> = 10</button><button aria-pressed="true" data-n="30">30</button><button aria-pressed="false" data-n="60">60</button><button aria-pressed="false" data-n="120">120</button></div>
+      </div>
+      <div class="chart" id="ciLab"></div>
+      <div class="live" id="ciLive"></div>
+      <div class="note-live">Live simulation. In the report (seed 20261118), 97 of 100 intervals captured the mean, and long-run coverage was 94.9%. A z-interval would cover only 93.7%.</div>
+    </div>
+
+    <div class="block grid-2">
+      <div data-reveal>
+        <h3 class="sub">What moves the <em>margin</em></h3>
+        <div class="tbl-wrap"><table class="lux"><thead><tr><th>Level</th><th><span class="nt">n</span> = 10</th><th><span class="nt">n</span> = 30</th><th><span class="nt">n</span> = 60</th><th><span class="nt">n</span> = 120</th></tr></thead><tbody>
+          <tr><td>90%</td><td>8.68</td><td>4.65</td><td>3.23</td><td>2.27</td></tr>
+          <tr class="hl"><td>95%</td><td>10.71</td><td>5.59</td><td>3.87</td><td>2.71</td></tr>
+          <tr><td>99%</td><td>15.39</td><td>7.54</td><td>5.15</td><td>3.58</td></tr>
+        </tbody></table></div>
+      </div>
+      <div class="prose" data-reveal data-d="1">
+        <p><strong>Assumptions:</strong> an independent random sample (undocumented here, which is the key caveat), a roughly normal population or a large enough n (Shapiro–Wilk p = 0.339), no extreme outliers, and a population with this role mix.</p>
+        <p><strong>Interpretation:</strong> we are 95% confident that the mean strike rate of the population these players represent lies between <strong>116.34</strong> and <strong>127.53</strong> runs per 100 balls. The interval contains par, 120.</p>
+      </div>
+    </div>
+
+    <div class="reflect" data-reveal>
+      <div class="eyebrow">Reflection questions</div>
+      <details class="qa"><summary><span class="qn">1</span><span class="q">How should a 95% confidence interval be interpreted over repeated sampling?</span><span class="pm"></span></summary>
+        <div class="a prose"><p>If we repeatedly drew random samples of 30 and built an interval each time, about 95% of those intervals would contain the true mean. The lab shows this happening. The mean is fixed and the intervals vary. A single computed interval either contains μ or it does not, so we say we are 95% <em>confident</em>, not that μ has a 95% probability of lying inside it. The guarantee also relies on random sampling.</p></div></details>
+      <details class="qa"><summary><span class="qn">2</span><span class="q">How do confidence level, sample size and variability affect margin of error?</span><span class="pm"></span></summary>
+        <div class="a prose"><p>ME = t* × s/√n. A higher confidence level raises t* (at n = 30: 4.65 at 90%, 5.59 at 95%, 7.54 at 99%). A larger n shrinks the SE like 1/√n (at 95%: 10.71 at n = 10, 2.71 at n = 120). More variability widens the interval proportionally. Studying one role, where the within-role SD is about 8.89 against 14.98, would narrow it sharply.</p></div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ IV · TEST ═══════════════ -->
+<section class="chapter" id="test">
+  <div class="wrap">
+    <div class="ch-head">
+      <div class="numeral" aria-hidden="true">IV</div>
+      <div data-reveal>
+        <div class="eyebrow">Task 4 · One-sample t test</div>
+        <h2 class="display">On par, <em>as far as we can tell</em></h2>
+        <p class="intro">Claim: the population’s mean strike rate equals par. The benchmark μ₀ = 120 is an assumed target, fixed in advance, with a two-sided alternative.</p>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="test" data-reveal>
+        <div class="th"><b>One-sample Student’s t test</b><span>Task 4 · inferential</span></div>
+        <dl>
+          <dt>Hypotheses</dt><dd>H₀: μ = 120. H₁: μ ≠ 120.</dd>
+          <dt>Level</dt><dd><span class="n">α = 0.05</span> · critical ±2.045</dd>
+          <dt>Statistic · df</dt><dd><span class="n">t = (121.93 − 120) / 2.734 = 0.7071</span> on df = 29</dd>
+          <dt>p-value</dt><dd><span class="n">p = 0.4852</span> (two-sided)</dd>
+          <dt>Decision</dt><dd><span class="chip keep">Fail to reject H₀</span></dd>
+          <dt>Conclusion</dt><dd>There is no evidence that the mean strike rate differs from par. This is not proof that it equals 120: the 95% CI (116.34–127.53) is also consistent with means a few points either side.</dd>
+        </dl>
+      </div>
+      <div data-reveal data-d="1">
+        <div class="callout" style="margin-top:0"><div class="eyebrow">Significance versus importance</div>
+          <div class="prose"><p>The gap is 1.93 points: 0.0193 runs per ball, or about 0.12 runs per over. Cohen’s d = 0.129. Even if a far larger sample made it “significant”, a difference this size would be practically irrelevant.</p></div></div>
+        <div class="callout"><div class="eyebrow">Why fix the benchmark first</div>
+          <div class="prose"><p>Chosen after seeing <span class="bar">x</span> = 121.93, a benchmark could be steered: 110 would guarantee significance and 122 would guarantee its absence. Either way the 5% error rate would no longer hold. That is HARKing. Writing μ₀ into the code before loading the data keeps the test honest.</p></div></div>
+      </div>
+    </div>
+
+    <div class="chart-card block" data-reveal>
+      <div class="chart-head">
+        <div class="chart-title">Where t = 0.707 falls<small>The t(29) distribution under H₀. Rose tails form the 5% rejection region; gold tails are the p-value.</small></div>
+      </div>
+      <div class="warn">✦ Illustration only: the real benchmark was fixed at 120 before the data were examined. Moving it shows why it must not be chosen afterwards.</div>
+      <div class="slider-row">
+        <label><span class="top"><span class="ctl-label">What if the benchmark were</span><span class="readout" id="b0V">120</span></span><input type="range" id="b0" min="105" max="140" step="0.5" value="120"></label>
+      </div>
+      <div class="chart" id="tDist"></div>
+      <div class="live" id="tLive"></div>
+    </div>
+
+    <div class="reflect" data-reveal>
+      <div class="eyebrow">Reflection questions</div>
+      <details class="qa"><summary><span class="qn">1</span><span class="q">What does rejecting or failing to reject the null hypothesis imply?</span><span class="pm"></span></summary>
+        <div class="a prose"><p>Rejecting would mean the data are unlikely if μ = 120, so we would conclude a difference, with a 5% Type I risk and without saying anything about cause or size. Failing to reject, as here (p = 0.485), means the data are compatible with 120, not that μ equals 120. With power of only 0.424 against a 5-point departure, a real moderate difference could go unseen. The interval 116.34–127.53 shows what remains plausible.</p></div></details>
+      <details class="qa"><summary><span class="qn">2</span><span class="q">Why should the benchmark be specified before examining the result?</span><span class="pm"></span></summary>
+        <div class="a prose"><p>A p-value is only valid if the hypothesis is independent of the data. A benchmark picked after seeing <span class="bar">x</span> can be tuned to produce or avoid significance, which inflates the real error rate. The slider above shows how easily t and p move. Fixing μ₀ = 120 from cricket convention, in code, before loading the data, with a two-sided alternative chosen in advance, prevents this.</p></div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ V · POWER ═══════════════ -->
+<section class="chapter" id="power">
+  <div class="wrap">
+    <div class="ch-head">
+      <div class="numeral" aria-hidden="true">V</div>
+      <div data-reveal>
+        <div class="eyebrow">Task 5 · Errors &amp; power</div>
+        <h2 class="display">The power to <em>notice</em></h2>
+        <p class="intro">A <strong>Type I</strong> error declares the squad off par when it is on par (probability α). A <strong>Type II</strong> error misses a real departure (probability β). Power, 1 − β, depends on α, n, σ and the size of the true departure.</p>
+      </div>
+    </div>
+
+    <div class="chart-card" data-reveal>
+      <div class="chart-head">
+        <div class="chart-title">Power explorer<small>Exact power of the two-sided one-sample t test, from the noncentral t distribution, computed live.</small></div>
+        <div class="controls" style="margin:0">
+          <span class="ctl-label"><span class="nt">α</span></span>
+          <div class="seg" role="group" aria-label="Significance level" id="pwA"><button aria-pressed="false" data-a="0.01">0.01</button><button aria-pressed="true" data-a="0.05">0.05</button><button aria-pressed="false" data-a="0.1">0.10</button></div>
+        </div>
+      </div>
+      <div class="slider-row">
+        <label><span class="top"><span class="ctl-label">True mean <span class="nt">μ</span></span><span class="readout" id="pwMuV">125.0</span></span><input type="range" id="pwMu" min="105" max="135" step="0.5" value="125"></label>
+        <label><span class="top"><span class="ctl-label">Sample size <span class="nt">n</span></span><span class="readout" id="pwNV">30</span></span><input type="range" id="pwN" min="5" max="200" step="1" value="30"></label>
+        <label><span class="top"><span class="ctl-label">SD <span class="nt">σ</span></span><span class="readout" id="pwSV">14.98</span></span><input type="range" id="pwS" min="5" max="30" step="0.01" value="14.98"></label>
+      </div>
+      <div class="split" style="align-items:center">
+        <div>
+          <div class="ctl-label">Power <span class="nt">1 − β</span></div>
+          <div class="big-readout" id="pwOut">—</div>
+          <div class="meter"><i id="pwBar"></i></div>
+          <div class="live two" id="pwLive"></div>
+          <div class="note-live">Presets: <a href="#" data-preset="base" style="color:var(--gold)">this study</a> · <a href="#" data-preset="within" style="color:var(--gold)">within-role σ</a> · <a href="#" data-preset="n73" style="color:var(--gold)">n for 80%</a></div>
+        </div>
+        <div class="chart" id="pwDist"></div>
+      </div>
+      <div class="chart" id="pwCurve" style="margin-top:12px"></div>
+    </div>
+
+    <div class="grid-2 block">
+      <div data-reveal>
+        <h3 class="sub">Power at <em>n = 30</em></h3>
+        <div class="tbl-wrap"><table class="lux"><thead><tr><th>Departure Δ</th><th><span class="nt">σ</span> = 14.98</th><th><span class="nt">σ</span> = 8.89</th><th><span class="nt">n</span> for 80% (<span class="nt">σ = s</span>)</th></tr></thead><tbody>
+          <tr><td>2.5</td><td>0.143</td><td>0.319</td><td>284</td></tr>
+          <tr class="hl"><td>5</td><td>0.424</td><td>0.846</td><td>73</td></tr>
+          <tr><td>7.5</td><td>0.755</td><td>0.994</td><td>34</td></tr>
+          <tr><td>10</td><td>0.942</td><td>1.000</td><td>20</td></tr>
+        </tbody></table></div>
+      </div>
+      <div class="prose" data-reveal data-d="1">
+        <p><strong>α:</strong> at Δ = 5, power is 0.198, 0.424 and 0.556 for α = 0.01, 0.05 and 0.10. <strong>n:</strong> 0.157, 0.424, 0.720 and 0.952 for n = 10, 30, 60 and 120. <strong>σ:</strong> the within-role SD of 8.89 lifts power from 0.424 to 0.846. <strong>Δ:</strong> detecting a gap as small as the observed 1.93 points with 80% power would need about 473 players.</p>
+        <p><strong>Simulation check:</strong> the Type I rate was 0.0508 for normal data and 0.0485 for the data’s own shape. Power at Δ = 5 was 0.4255 against an exact 0.424. No second inferential test was run.</p>
+      </div>
+    </div>
+
+    <div class="reflect" data-reveal>
+      <div class="eyebrow">Reflection questions</div>
+      <details class="qa"><summary><span class="qn">1</span><span class="q">Which decision error could be more consequential in this context?</span><span class="pm"></span></summary>
+        <div class="a prose"><p>For a coach or selector, usually the Type II error. A real pace deficit, for example a true mean of 112, would go uncorrected and cost runs and matches, and at n = 30 the power to detect a 5-point gap is only 0.424. A Type I error triggers unnecessary changes to batting plans, which are usually reversible. If the result were used to justify an expensive or irreversible decision, the Type I error would matter more, and a smaller α would be justified.</p></div></details>
+      <details class="qa"><summary><span class="qn">2</span><span class="q">How could power be improved without changing the significance level?</span><span class="pm"></span></summary>
+        <div class="a prose"><p>Increase n: about 73 players give 80% power at Δ = 5. Reduce σ: measure strike rate over more balls, study a homogeneous group, or stratify by role (σ ≈ 8.89 gives power 0.846). Use a one-sided test, but only if the direction is fixed in advance. Use paired designs, such as the same players before and after a change. Improve measurement quality.</p></div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ VERDICT ═══════════════ -->
+<section class="chapter" id="verdict">
+  <div class="wrap">
+    <div class="ch-head">
+      <div class="numeral" aria-hidden="true">✦</div>
+      <div data-reveal>
+        <div class="eyebrow">The verdict · Volume II</div>
+        <h2 class="display">On par, <em>underpowered</em></h2>
+        <p class="intro">Mean pace is 121.93 runs per 100 balls (95% CI 116.34–127.53), well described by a normal MLE. There is no evidence of a difference from par 120 (p = 0.485), but power is modest, so “no evidence of a difference” should not be read as “equal to par”.</p>
+      </div>
+    </div>
+    <div class="summary" data-reveal>
+      <div><div class="n">I</div><h4>Binomial</h4><p>A constant p fails by role, and the quota design shrinks Var(X).</p><div class="stat">X = 18 · 10/7/1</div></div>
+      <div><div class="n">II</div><h4>Likelihood</h4><p>The closed-form MLE is confirmed numerically.</p><div class="stat"><span class="hat">μ</span> 121.93 · <span class="hat">σ</span>² 216.80</div></div>
+      <div><div class="n">III</div><h4>Interval</h4><p>A Student’s t interval at n = 30.</p><div class="stat">116.34 – 127.53</div></div>
+      <div><div class="n">IV</div><h4>Test</h4><p>No difference from par, and the gap is negligible.</p><div class="stat">t = 0.707 · p = 0.485</div></div>
+      <div><div class="n">V</div><h4>Power</h4><p>Type II risk is real at n = 30.</p><div class="stat">0.424 at Δ = 5 · n80 = 73</div></div>
+    </div>
+
+    <div class="block grid-2">
+      <div data-reveal>
+        <h3 class="sub">Limitations</h3>
+        <div class="prose"><p><strong>Sampling</strong> is undocumented and quota-like. The <strong>par of 120</strong> is a labelled assumption. <strong>Balls faced</strong> are not recorded, so strike-rate reliability is unknown. <strong>Role mixture</strong> strains the constant-p and identical-distribution assumptions. The data are <strong>observational</strong>, so no causal claims are made.</p></div>
+      </div>
+      <div data-reveal data-d="1">
+        <h3 class="sub">Reproduce <em>Volume II</em></h3>
+        <pre class="code"><span class="c"># statistics, figures, tables, results/ps2/results.json</span>
+<span class="p">$ </span>pip install -r requirements.txt
+<span class="p">$ </span>python analysis_ps2.py
+
+<span class="c"># (optional) rebuild both PDFs and the website</span>
+<span class="p">$ </span>node tools/build.cjs</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ DOWNLOADS ═══════════════ -->
+<section class="chapter" id="downloads" style="border-bottom:0">
+  <div class="wrap">
+    <div class="eyebrow" data-reveal>Submission files · Volume II</div>
+    <h2 class="display" data-reveal style="margin:22px 0 56px">Take it <em>with you</em></h2>
+    <div class="downloads">
+      <a class="card dl" href="downloads/MFAD_Datathon_Report_PS2.pdf" target="_blank" rel="noopener" data-reveal>
+        <div><div class="ext">.PDF · REPORT · PS2</div><h4>The Volume II report</h4><p>A typeset report covering all five tasks, with test cards, figures and all ten reflections.</p></div>
+        <div class="go">Open <span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14m0 0l-6-6m6 6l-6 6"/></svg></span></div></a>
+      <a class="card dl" href="downloads/analysis_ps2.py" download data-reveal data-d="1">
+        <div><div class="ext">.PY · CODE · PS2</div><h4>analysis_ps2.py</h4><p>One file that runs top to bottom and reproduces every number, table and plot in Volume II.</p></div>
+        <div class="go">Download <span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4v12m0 0l-5-5m5 5l5-5"/></svg></span></div></a>
+      <a class="card dl" href="index.html" data-reveal data-d="2">
+        <div><div class="ext">VOLUME I · PS1</div><h4>Runs, Roles &amp; Randomness</h4><p>Sampling, MSE, the CLT, ANOVA and χ² on Runs_Scored, with its own report and code.</p></div>
+        <div class="go">Visit <span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14m0 0l-6-6m6 6l-6 6"/></svg></span></div></a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="big" aria-hidden="true">Pace, Par &amp; Power</div>
+    <div class="row"><span>PES University · MFAD Datathon · 2026 · Volume II</span><a href="index.html">← Volume I · Runs, Roles &amp; Randomness</a><a href="#top">Back to top ↑</a></div>
+  </div>
+</footer>
+
+<script src="assets/vendor/d3.v7.9.0.min.js"></script>
+<script src="assets/js/data-ps2.js"></script>
+<script src="assets/js/app-ps2.js"></script>
+</body>
+</html>

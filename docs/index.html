@@ -22,7 +22,10 @@
 <!-- ═══════════════ NAV ═══════════════ -->
 <header class="nav" id="nav">
   <div class="wrap">
-    <a class="brand" href="#top" aria-label="Back to top"><span class="seal">m</span><span class="txt">MFAD · Datathon</span></a>
+    <div class="brand-wrap">
+      <a class="brand" href="#top" aria-label="Back to top"><span class="seal">m</span><span class="txt">MFAD · Datathon</span></a>
+      <nav class="vols" aria-label="Volumes"><a class="on" href="index.html" aria-current="page" title="Volume I · Runs, Roles &amp; Randomness">I</a><a href="ps2.html" title="Volume II · Pace, Par &amp; Power">II</a></nav>
+    </div>
     <nav class="links" aria-label="Chapters">
       <a href="#study">The Study</a><a href="#sampling">Sampling</a><a href="#estimation">Estimation</a>
       <a href="#normality">Normality</a><a href="#anova">ANOVA</a><a href="#fit">Fit</a><a href="#verdict">Verdict</a>
@@ -220,16 +223,16 @@
       </div>
       <div class="chart-card" data-reveal data-d="1">
         <div class="chart-head"><div class="chart-title">Unbiased ≠ best<small>MSE = variance + bias² for two variance estimators</small></div></div>
-        <div class="legend"><span><i class="sq" style="background:#6B7690"></i>Variance · s²</span><span><i class="sq" style="background:var(--gold)"></i>Variance · σ̂²</span><span><i class="sq" style="background:repeating-linear-gradient(45deg,#E6CC94 0 2px,transparent 2px 4px)"></i>Bias²</span></div>
+        <div class="legend"><span><i class="sq" style="background:#6B7690"></i>Variance · s²</span><span><i class="sq" style="background:var(--gold)"></i>Variance · <span class="hat">σ</span>²</span><span><i class="sq" style="background:repeating-linear-gradient(45deg,#E6CC94 0 2px,transparent 2px 4px)"></i>Bias²</span></div>
         <div class="chart" id="decomp"></div>
-        <div class="caption"><b>Read</b>The biased σ̂² wins on MSE (12.47M against 16.91M runs⁴ at n = 5). The gap closes as n grows.</div>
+        <div class="caption"><b>Read</b>The biased <span class="hat">σ</span>² wins on MSE (12.47M against 16.91M runs⁴ at n = 5). The gap closes as n grows.</div>
       </div>
     </div>
 
     <div class="reflect" data-reveal>
       <div class="eyebrow">Reflection questions</div>
       <details class="qa"><summary><span class="qn">1</span><span class="q">What does MSE capture beyond estimator variance?</span><span class="pm"></span></summary>
-        <div class="a prose"><p><strong>Bias²</strong>, the systematic error. Variance measures spread around the estimator’s own average. MSE measures spread around the <em>truth</em>. An estimator can be very precise and still consistently wrong. Because both errors share one scale, MSE also lets us compare biased and unbiased estimators fairly, which is how σ̂² beats s². One caution: resampling MSE ignores selection bias from the non-random sampling in Task 1, and that bias would add to the real error.</p></div></details>
+        <div class="a prose"><p><strong>Bias²</strong>, the systematic error. Variance measures spread around the estimator’s own average. MSE measures spread around the <em>truth</em>. An estimator can be very precise and still consistently wrong. Because both errors share one scale, MSE also lets us compare biased and unbiased estimators fairly, which is how <span class="hat">σ</span>² beats s². One caution: resampling MSE ignores selection bias from the non-random sampling in Task 1, and that bias would add to the real error.</p></div></details>
       <details class="qa"><summary><span class="qn">2</span><span class="q">How can sample size affect the precision and MSE of an estimator?</span><span class="pm"></span></summary>
         <div class="a prose"><p>Var(<span class="bar-x">x</span>) = σ²/n, so precision grows in proportion to n and the standard error shrinks like 1/√n. The MSE of the mean falls from 1,294.4 at n = 5 to 218.7 at n = 30, and halving the error needs four times the data. Small-sample biases such as −σ²/n also vanish, so both variance estimators are consistent. Design bias does <em>not</em> shrink with n, though. A larger quota sample just estimates the wrong quantity more precisely.</p></div></details>
     </div>
@@ -489,6 +492,35 @@
   </div>
 </section>
 
+<!-- ═══════════════ VOLUME II TEASER ═══════════════ -->
+<section class="chapter" id="volume-ii">
+  <div class="wrap">
+    <a class="volume-card" href="ps2.html" data-reveal>
+      <div>
+        <div class="eyebrow">Continue · Volume II · Problem Statement 2</div>
+        <h3>Pace, Par<br>&amp; <em>Power</em></h3>
+        <div class="prose"><p>The same thirty players, a distinct question: how fast do they score? Strike rate studied through a binomial event, a normal likelihood, a 95% confidence interval, a one-sample t test against a pre-specified par of 120, and the power of that test, with five interactive labs.</p></div>
+        <div style="margin-top:26px"><span class="btn">Enter Volume II <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14m0 0l-6-6m6 6l-6 6"/></svg></span></div>
+      </div>
+      <div class="art" aria-hidden="true">
+        <svg viewBox="0 0 400 220" preserveAspectRatio="none"><defs><linearGradient id="vg" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="220"><stop offset="0" stop-color="#C9A35A"/><stop offset=".5" stop-color="#E7CF9A"/><stop offset="1" stop-color="#C9A35A"/></linearGradient></defs>
+          <line x1="0" x2="400" y1="108" y2="108" stroke="#CF5F80" stroke-opacity=".5" stroke-dasharray="2 5"/>
+          <g stroke-linecap="round">
+            <line x1="14" x2="14" y1="62" y2="150" stroke="url(#vg)" stroke-width="2"/><line x1="34" x2="34" y1="70" y2="160" stroke="url(#vg)" stroke-width="2"/><line x1="54" x2="54" y1="48" y2="132" stroke="url(#vg)" stroke-width="2"/>
+            <line x1="74" x2="74" y1="66" y2="146" stroke="url(#vg)" stroke-width="2"/><line x1="94" x2="94" y1="20" y2="92" stroke="#DD7894" stroke-width="2.6"/><line x1="114" x2="114" y1="58" y2="144" stroke="url(#vg)" stroke-width="2"/>
+            <line x1="134" x2="134" y1="74" y2="158" stroke="url(#vg)" stroke-width="2"/><line x1="154" x2="154" y1="54" y2="138" stroke="url(#vg)" stroke-width="2"/><line x1="174" x2="174" y1="64" y2="150" stroke="url(#vg)" stroke-width="2"/>
+            <line x1="194" x2="194" y1="44" y2="128" stroke="url(#vg)" stroke-width="2"/><line x1="214" x2="214" y1="68" y2="152" stroke="url(#vg)" stroke-width="2"/><line x1="234" x2="234" y1="60" y2="140" stroke="url(#vg)" stroke-width="2"/>
+            <line x1="254" x2="254" y1="72" y2="160" stroke="url(#vg)" stroke-width="2"/><line x1="274" x2="274" y1="52" y2="134" stroke="url(#vg)" stroke-width="2"/><line x1="294" x2="294" y1="118" y2="196" stroke="#DD7894" stroke-width="2.6"/>
+            <line x1="314" x2="314" y1="62" y2="146" stroke="url(#vg)" stroke-width="2"/><line x1="334" x2="334" y1="56" y2="140" stroke="url(#vg)" stroke-width="2"/><line x1="354" x2="354" y1="70" y2="154" stroke="url(#vg)" stroke-width="2"/>
+            <line x1="374" x2="374" y1="50" y2="136" stroke="url(#vg)" stroke-width="2"/><line x1="394" x2="394" y1="64" y2="148" stroke="url(#vg)" stroke-width="2"/>
+          </g>
+          <line x1="0" x2="400" y1="100" y2="100" stroke="#EFE7D7" stroke-opacity=".8"/>
+        </svg>
+      </div>
+    </a>
+  </div>
+</section>
+
 <!-- ═══════════════ DOWNLOADS ═══════════════ -->
 <section class="chapter" id="downloads" style="border-bottom:0">
   <div class="wrap">
@@ -505,6 +537,17 @@
         <div><div class="ext">.CSV · DATA</div><h4>Dataset 13</h4><p>The 30 players exactly as supplied. Nothing was added, removed or edited.</p></div>
         <div class="go">Download <span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4v12m0 0l-5-5m5 5l5-5"/></svg></span></div></a>
     </div>
+    <div class="dl-group">
+      <div class="eyebrow" data-reveal>Volume II · Problem Statement 2</div>
+      <div class="downloads two-up">
+        <a class="card dl" href="downloads/MFAD_Datathon_Report_PS2.pdf" target="_blank" rel="noopener" data-reveal>
+          <div><div class="ext">.PDF · REPORT · PS2</div><h4>Pace, Par &amp; Power</h4><p>The Problem Statement 2 report: binomial modelling, normal MLE, a 95% CI, a one-sample t test and power.</p></div>
+          <div class="go">Open <span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14m0 0l-6-6m6 6l-6 6"/></svg></span></div></a>
+        <a class="card dl" href="downloads/analysis_ps2.py" download data-reveal data-d="1">
+          <div><div class="ext">.PY · CODE · PS2</div><h4>analysis_ps2.py</h4><p>The Problem Statement 2 code. It runs top to bottom and reproduces every number, table and plot in that report.</p></div>
+          <div class="go">Download <span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4v12m0 0l-5-5m5 5l5-5"/></svg></span></div></a>
+      </div>
+    </div>
   </div>
 </section>
 </main>
@@ -512,7 +555,7 @@
 <footer>
   <div class="wrap">
     <div class="big" aria-hidden="true">Runs, Roles &amp; Randomness</div>
-    <div class="row"><span>PES University · MFAD Datathon · 2026</span><span>Python · NumPy · SciPy · Matplotlib · D3</span><a href="#top">Back to top ↑</a></div>
+    <div class="row"><span>PES University · MFAD Datathon · 2026</span><span>Python · NumPy · SciPy · Matplotlib · D3</span><a href="ps2.html">Volume II · Pace, Par &amp; Power →</a><a href="#top">Back to top ↑</a></div>
   </div>
 </footer>
 

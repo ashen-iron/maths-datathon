@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pace, Par &amp; Power — MFAD Datathon Report (Problem Statement 2)</title>
+<link rel="stylesheet" href="report.css">
+<style>
+/* Problem Statement 2: running header and small additions; everything else comes from report.css */
+@page{
+  @top-left{content:"Pace, Par & Power"}
+  @top-right{content:"MFAD Datathon  ·  Problem Statement 2  ·  Dataset 13"}
+}
+.eq.block{font-size:11.6pt;line-height:1.9}
+.vol{display:inline-block;font-family:var(--sans);font-size:6.6pt;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);border:.4pt solid var(--gold);border-radius:6mm;padding:.6mm 2.4mm;margin-left:2mm;vertical-align:2pt}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════ COVER ══════════════════════════════ -->
+<section class="cover">
+  <div class="glow"></div>
+  <svg class="rings" viewBox="0 0 200 200" aria-hidden="true">
+    <g fill="none" stroke="#C9A35A">
+      <circle cx="100" cy="100" r="96" stroke-opacity=".10" stroke-width=".25"/>
+      <circle cx="100" cy="100" r="80" stroke-opacity=".14" stroke-width=".25"/>
+      <circle cx="100" cy="100" r="64" stroke-opacity=".18" stroke-width=".25"/>
+      <circle cx="100" cy="100" r="48" stroke-opacity=".22" stroke-width=".25"/>
+      <circle cx="100" cy="100" r="32" stroke-opacity=".26" stroke-width=".25"/>
+      <rect x="97.6" y="88" width="4.8" height="24" stroke-opacity=".4" stroke-width=".3"/>
+      <line x1="96" y1="91" x2="104" y2="91" stroke-opacity=".4" stroke-width=".25"/>
+      <line x1="96" y1="109" x2="104" y2="109" stroke-opacity=".4" stroke-width=".25"/>
+      <line x1="100" y1="2" x2="100" y2="198" stroke-opacity=".10" stroke-width=".2"/>
+      <line x1="2" y1="100" x2="198" y2="100" stroke-opacity=".10" stroke-width=".2"/>
+    </g>
+  </svg>
+  <div class="frame"></div>
+  <div class="top">
+    <div class="mark"><div class="mono-mark">m</div>{{meta_institution}}</div>
+    <div>{{meta_event}} · 2026 · Volume II</div>
+  </div>
+  <div class="titleblock">
+    <div class="kicker">{{meta_problem}} &nbsp;—&nbsp; {{meta_dataset}}</div>
+    <h1>Pace, Par<br>&amp; <em>Power</em></h1>
+    <div class="sub">How fast do these thirty players score? A study of strike rate through a binomial event, a normal likelihood, a confidence interval, a test against par, and the power behind it.</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>{{xbar}}</b><span>Mean strike rate</span></div>
+    <div class="stat"><b>{{X}}/30</b><span>At par or better</span></div>
+    <div class="stat"><b>p = {{p}}</b><span>Test against 120</span></div>
+    <div class="stat"><b>{{power5}}</b><span>Power at Δ = 5</span></div>
+  </div>
+  <div class="curve">{{cover_ci}}</div>
+  <div class="foot">
+    <div class="team">{{meta_team_block}}</div>
+    <div style="text-align:right">{{meta_date}}<br><span style="letter-spacing:.14em;opacity:.8">Unit 3 &amp; Unit 4 · Binomial · MLE · CI · t test · Power</span></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ OVERVIEW ══════════════════════════════ -->
+<section>
+  <div class="eyebrow">Overview · Volume II</div>
+  <h2 style="font-family:var(--display);font-weight:500;font-size:30pt;line-height:1.05;margin:2mm 0 4mm">The question, <em style="color:var(--gold)">in brief</em></h2>
+  <p class="lead">How fast do the players in this sample score? Can strike rate be modelled as a random variable, both through a par-or-better event and through a normal likelihood? How precisely can its mean be estimated, does that mean differ from a par of 120 runs per 100 balls, and how much power does such a test have?</p>
+
+  <div class="cards">
+    <div class="card"><span class="eyebrow">Task 1 · Binomial</span><div class="big">{{X}} <small>of 30 at par</small></div>
+      <p>X ~ Binomial(30, p) needs a constant p. By role the counts are {{x_bat}}, {{x_ar}} and {{x_bowl}} out of 10, so p clearly depends on role.</p></div>
+    <div class="card"><span class="eyebrow">Task 2 · Normal MLE</span><div class="big"><span class="hat">μ</span> = {{mu_mle}}</div>
+      <p><span class="hat">σ</span>² = {{s2_mle}} (divisor n), against s² = {{s2_unb}}. A numerical optimiser confirms the closed-form maximum.</p></div>
+    <div class="card"><span class="eyebrow">Task 3 · 95% CI (t)</span><div class="big">{{ci_lo}}–{{ci_hi}}</div>
+      <p>SE = {{se}}, t* = {{tcrit}}, margin of error = {{me}} runs per 100 balls. In repeated sampling, {{cover100}} of 100 intervals captured the mean.</p></div>
+    <div class="card"><span class="eyebrow">Task 4 · One-sample t</span><div class="big">t = {{t}} <small>df = {{df}}</small></div>
+      <p>p = {{p}} against the assumed par of 120, so we fail to reject H₀. The gap of {{diff}} points (d = {{d}}) is also of little practical importance.</p></div>
+  </div>
+
+  <div class="two">
+    <div>
+      <h4 style="margin-top:0">Contents</h4>
+      <ol class="toc">
+        <li><span class="n">0</span><span class="t">Data &amp; variable choice<small>Why Strike_Rate, and what it measures</small></span><span class="tag">§0</span></li>
+        <li><span class="n">1</span><span class="t">Random variables &amp; binomial<small>Par-or-better count, model assumptions</small></span><span class="tag">Task 1</span></li>
+        <li><span class="n">2</span><span class="t">Maximum likelihood<small>Normal likelihood, μ̂ and σ̂²</small></span><span class="tag">Task 2</span></li>
+        <li><span class="n">3</span><span class="t">Confidence interval<small>Student’s t, SE, margin of error</small></span><span class="tag">Task 3</span></li>
+        <li><span class="n">4</span><span class="t">One-sample t test<small>Against a pre-specified par</small></span><span class="tag">Task 4</span></li>
+        <li><span class="n">5</span><span class="t">Errors &amp; power<small>Type I, Type II, what drives power</small></span><span class="tag">Task 5</span></li>
+        <li><span class="n">6</span><span class="t">Conclusions &amp; limitations<small>Significance vs importance</small></span><span class="tag">§6</span></li>
+      </ol>
+    </div>
+    <div>
+      <h4 style="margin-top:0">How to read this report</h4>
+      <p class="note">This is <strong>Volume II</strong> of the Dataset 13 study. Volume I (Problem Statement 1) analysed <em>Runs_Scored</em>. This volume asks a distinct question about scoring <em>pace</em>, using <em>Strike_Rate</em>.</p>
+      <p class="note">Every number, table and figure is produced by <span class="mono">analysis_ps2.py</span>, which runs top to bottom with a fixed seed ({{seed}}). The benchmark of 120 is written into that file <em>before</em> the data are loaded.</p>
+      <p class="note">Each inferential procedure is reported on a <strong>test card</strong> giving the hypotheses, α, statistic, degrees of freedom, p-value, decision and conclusion. All tests use α = 0.05. <em>Player_ID</em> is excluded from every calculation.</p>
+      <p class="note">The data are observational, so no result here is read as causal.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ §0 ══════════════════════════════ -->
+<section class="page">
+  <div class="chapter"><div class="num">00</div><div><div class="eyebrow">Before the tasks</div><h2>Data &amp; <em>variable choice</em></h2>
+    <div class="vars">File <b>Dataset_13.csv</b> · {{n}} players · {{missing}} missing values · primary variable <b>Strike_Rate</b></div></div></div>
+
+  <p>As in Volume I, the file holds one identifier (<em>Player_ID</em>, excluded), five numerical measurements and one categorical variable (<em>Player_Role</em>). This volume uses <strong>Strike_Rate</strong>, the runs a player scores per 100 balls faced, ranging from {{sr_min}} to {{sr_max}} here.</p>
+  <table>
+    <caption><b>Table 0.1</b>Why Strike_Rate suits each task</caption>
+    <thead><tr><th class="l" style="width:22%">Task</th><th class="l">Requirement</th><th class="l" style="width:48%">How Strike_Rate meets it</th></tr></thead>
+    <tbody>
+      <tr><td>1 · Binomial</td><td class="l">A numerical measure and a meaningful binary event</td><td class="l">“Strikes at par or better” (S ≥ 120) is a natural cricket event</td></tr>
+      <tr><td>2 · Normal MLE</td><td class="l">A continuous, roughly symmetric variable</td><td class="l">A continuous rate; Shapiro–Wilk p = {{sw_p}}; skewness {{skew}}</td></tr>
+      <tr><td>3 · CI for μ</td><td class="l">A meaningful population mean</td><td class="l">The mean scoring pace of the population of players</td></tr>
+      <tr><td>4 · One-sample test</td><td class="l">A benchmark for the mean</td><td class="l">A par rate of 120 (1.2 runs per ball) exists in the sport</td></tr>
+      <tr><td>5 · Power</td><td class="l">A one-sample mean test to analyse</td><td class="l">The Task 4 t test</td></tr>
+    </tbody>
+  </table>
+  <div class="callout"><span class="eyebrow">Limitations of the variable</span>
+    <p>The file does not give the number of balls faced, the reference period or the competition. Bowlers bat less often, so their strike rates may rest on few balls and be less reliable. All 30 players are included, so the population mean refers to a squad with this role mix. These points are revisited in every task.</p></div>
+  <div class="callout"><span class="eyebrow">Pre-specified benchmark</span>
+    <p><strong>Assumed target, clearly labelled:</strong> μ₀ = {{mu0}} runs per 100 balls, which is 1.2 runs per ball or 7.2 runs per over, a conventional par scoring rate for limited-overs (T20) batting. This is a stated assumption, not a documented league figure, because the dataset does not name its competition. It is fixed in <span class="mono">analysis_ps2.py</span> before the data are loaded. The same value defines the Task 1 event, so the binary event and the benchmark mean the same thing.</p></div>
+</section>
+
+<!-- ══════════════════════════════ TASK 1 ══════════════════════════════ -->
+<section class="page">
+  <div class="chapter"><div class="num">01</div><div><div class="eyebrow">Task 1</div><h2>Random variables &amp; the <em>binomial model</em></h2>
+    <div class="vars">Variables · <b>Strike_Rate</b> → event <b>S ≥ 120</b> · context <b>Player_Role</b></div></div></div>
+
+  <h3><span class="k">1.1</span>Defining the random variables</h3>
+  <ul class="clean">
+    <li><strong>S</strong> is the strike rate of a randomly selected player from the target population. It is <em>continuous</em> in practice (100 × runs ÷ balls faced), with possible values S ≥ 0 and no fixed upper limit. Observed values run from {{sr_min}} to {{sr_max}}.</li>
+    <li><strong>B = 1{S ≥ 120}</strong> marks whether that player strikes at par or better. It is a <em>Bernoulli</em> variable with values {0, 1} and success probability <span class="m">p</span> = P(S ≥ 120).</li>
+    <li><strong>X = B<sub>1</sub> + … + B<sub>30</sub></strong> is the number of par-or-better players among n = 30. It is a <em>count</em> with possible values 0, 1, …, 30.</li>
+  </ul>
+  <p>In this sample <strong>X = {{X}}</strong>, so <span class="hat">p</span> = {{p_hat}}. If X ~ Binomial(30, p) with p = {{p_hat}}, then E[X] = 30p = {{binom_mean}}, Var(X) = 30p(1 − p) = {{binom_var}} (SD {{binom_sd}}), the central 95% range is {{binom_lo}}–{{binom_hi}}, and P(X = {{X}}) = {{pmf_obs}}.</p>
+
+  <table>
+    <caption><b>Table 1.1</b>The par-or-better count at different thresholds (thresholds fixed by convention, not fitted)</caption>
+    <thead><tr><th class="l">Threshold (runs / 100 balls)</th><th>X (of 30)</th><th><span class="hat">p</span></th><th>Batters (of 10)</th><th>All-rounders (of 10)</th><th>Bowlers (of 10)</th></tr></thead>
+    <tbody>
+      <tr><td>100 · a run a ball</td><td>{{thr100_X}}</td><td>{{thr100_p}}</td><td>{{thr100_bat}}</td><td>{{thr100_ar}}</td><td>{{thr100_bowl}}</td></tr>
+      <tr><td>110</td><td>{{thr110_X}}</td><td>{{thr110_p}}</td><td>{{thr110_bat}}</td><td>{{thr110_ar}}</td><td>{{thr110_bowl}}</td></tr>
+      <tr class="hl"><td><strong>120 · par (pre-specified)</strong></td><td><strong>{{thr120_X}}</strong></td><td><strong>{{thr120_p}}</strong></td><td>{{thr120_bat}}</td><td>{{thr120_ar}}</td><td>{{thr120_bowl}}</td></tr>
+      <tr><td>130</td><td>{{thr130_X}}</td><td>{{thr130_p}}</td><td>{{thr130_bat}}</td><td>{{thr130_ar}}</td><td>{{thr130_bowl}}</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <div class="svgwrap">{{fig:ps2/ps2_fig01_binomial}}</div>
+    <figcaption><b>Figure 1</b><span>(A) Binomial(30, 0.6) against the distribution X actually has when the design fixes 10 players per role with role-specific probabilities. (B) Role counts against the 3–9 range a constant p = 0.6 would make likely for a group of 10.</span></figcaption>
+  </figure>
+
+  <h3><span class="k">1.2</span>Could X be binomial? The three assumptions</h3>
+  <table>
+    <caption><b>Table 1.2</b>Binomial assumptions for X</caption>
+    <thead><tr><th class="l" style="width:20%">Assumption</th><th class="l">What it requires</th><th class="l" style="width:46%">Plausibility here</th></tr></thead>
+    <tbody>
+      <tr><td>Fixed number of trials</td><td class="l">n set in advance, not by the outcomes</td><td class="l"><strong>Met.</strong> n = 30 players, and each yields one 0/1 outcome.</td></tr>
+      <tr><td>Independence</td><td class="l">One player’s outcome does not change another’s</td><td class="l"><strong>Uncertain.</strong> Players are distinct, but the sampling is undocumented, and teammates share pitches, opposition and team tactics, which could create positive dependence.</td></tr>
+      <tr><td>Constant probability</td><td class="l">Every trial has the same p</td><td class="l"><strong>Violated.</strong> Par-or-better rates are {{x_bat}}/10, {{x_ar}}/10 and {{x_bowl}}/10 by role.</td></tr>
+    </tbody>
+  </table>
+  <p>How strong is the evidence that p is not constant? If every player had p = {{p_hat}}, each role of 10 would be expected to show {{role_exp}} successes, with a central 95% range of {{r_lo}}–{{r_hi}}. The probability that all 10 batters reach par would be {{p_bat_all}}, and the probability that at most one bowler does would be {{p_bowl_le}}. Both observed role counts lie outside the likely range, so a single constant p is not credible.</p>
+  <p><strong>The design matters.</strong> Volume I showed that the sample fixes 10 players per role. X is then a sum of three binomials, Bin(10, 1.0) + Bin(10, 0.7) + Bin(10, 0.1), with variance {{quota_var}} (SD {{quota_sd}}) and a central 95% range of {{quota_lo}}–{{quota_hi}}. A single Binomial(30, 0.6) overstates the variance by a factor of {{var_ratio}} (Figure 1A). If players were instead drawn <em>at random</em> from the whole population, each trial would have the same <em>marginal</em> probability p, and X would be binomial again, provided the players were independent. Heterogeneity alone does not break the binomial model; the fixed quotas do.</p>
+
+  <div class="reflections">
+    <span class="eyebrow">Reflection questions</span>
+    <div class="qa"><div class="qn">1</div><div><div class="q">Why is the selected quantity appropriately represented as a random variable?</div>
+      <p>Before a player is selected, their strike rate is unknown. It varies from player to player and, for the same player, from season to season, and it attaches a number to each possible outcome of the selection process. That is exactly what a random variable is: a function from uncertain outcomes to numbers, with a probability distribution. Treating S as random lets us describe its distribution (Task 2), quantify uncertainty about its mean (Task 3) and test claims (Task 4). The derived B and X are random for the same reason. Which player is selected, and therefore whether the event occurs, is not known in advance.</p></div></div>
+    <div class="qa"><div class="qn">2</div><div><div class="q">Which assumptions are needed for a binomial model, and how plausible are they here?</div>
+      <p>The model needs a <strong>fixed number of trials</strong> (n = 30: met), <strong>two outcomes per trial</strong> (par or better, or not: met by construction), <strong>independent trials</strong> (uncertain, because sampling is undocumented and teammates share conditions) and a <strong>constant success probability</strong> (violated: {{x_bat}}/10, {{x_ar}}/10 and {{x_bowl}}/10 by role, with probabilities of {{p_bat_all}} and {{p_bowl_le}} for the extreme counts under a constant p). The binomial model is therefore not appropriate for X as sampled. It would be reasonable within a single role, or for a simple random sample from the whole population, where each trial has the same marginal p.</p></div></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ TASK 2 ══════════════════════════════ -->
+<section class="page">
+  <div class="chapter"><div class="num">02</div><div><div class="eyebrow">Task 2</div><h2>Maximum likelihood for a <em>normal model</em></h2>
+    <div class="vars">Variable · <b>Strike_Rate</b> (continuous, n = {{n}})</div></div></div>
+
+  <h3><span class="k">2.1</span>The model and its assumptions</h3>
+  <p>We model the strike rates as <span class="m">S<sub>1</sub>, …, S<sub>n</sub></span> ~ iid N(μ, σ²). This assumes (i) <strong>independence</strong> between players, (ii) <strong>identical distribution</strong>, meaning every player shares the same μ and σ², (iii) a <strong>normal shape</strong>: continuous, symmetric and thin-tailed, and (iv) <strong>fixed parameters</strong> over the reference period.</p>
+
+  <h3><span class="k">2.2</span>The likelihood and its maximum</h3>
+  <p>With the data held fixed, the likelihood is a function of the parameters:</p>
+  <div class="eq block">L(μ, σ²) = ∏ (2πσ²)<sup>−1/2</sup> exp{ −(s<sub>i</sub> − μ)² / (2σ²) }<br>ℓ(μ, σ²) = log L = −(n/2) log(2π) − (n/2) log σ² − Σ(s<sub>i</sub> − μ)² / (2σ²)</div>
+  <p>Setting the score equations to zero gives the closed-form maximum:</p>
+  <div class="eq block">∂ℓ/∂μ = Σ(s<sub>i</sub> − μ)/σ² = 0 &nbsp;⇒&nbsp; <span class="hat">μ</span> = s̄ &nbsp;&nbsp;&nbsp;&nbsp; ∂ℓ/∂σ² = −n/(2σ²) + Σ(s<sub>i</sub> − μ)²/(2σ⁴) = 0 &nbsp;⇒&nbsp; <span class="hat">σ</span>² = (1/n) Σ(s<sub>i</sub> − s̄)²</div>
+  <p>The second derivatives are negative at this point, so it is a maximum, not a saddle.</p>
+
+  <table>
+    <caption><b>Table 2.1</b>Maximum likelihood estimates · Strike_Rate</caption>
+    <thead><tr><th class="l">Quantity</th><th class="l">Formula</th><th>Estimate</th><th class="l">Note</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td><span class="hat">μ</span> (MLE of μ)</td><td class="l">s̄</td><td><strong>{{mu_mle}}</strong></td><td class="l">runs per 100 balls</td></tr>
+      <tr class="hl"><td><span class="hat">σ</span>² (MLE of σ²)</td><td class="l">(1/n) Σ(s<sub>i</sub> − s̄)²</td><td><strong>{{s2_mle}}</strong></td><td class="l"><span class="hat">σ</span> = {{sd_mle}}</td></tr>
+      <tr><td>Maximised log-likelihood</td><td class="l">−(n/2)[log(2π<span class="hat">σ</span>²) + 1]</td><td>{{ll_max}}</td><td class="l">The highest value ℓ can reach</td></tr>
+      <tr><td>Numerical check</td><td class="l">Nelder–Mead on −ℓ</td><td>{{mu_num}} · {{sd_num}}</td><td class="l">Matches the closed form (μ, σ)</td></tr>
+      <tr><td>SE(<span class="hat">μ</span>)</td><td class="l"><span class="hat">σ</span>/√n (Fisher information)</td><td>{{se_mu}}</td><td class="l">Large-sample standard error</td></tr>
+      <tr><td>SE(<span class="hat">σ</span>²)</td><td class="l"><span class="hat">σ</span>²√(2/n)</td><td>{{se_s2}}</td><td class="l">Large-sample standard error</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <div class="svgwrap">{{fig:ps2/ps2_fig02_likelihood}}</div>
+    <figcaption><b>Figure 2</b><span>(A) The fitted N(121.93, 14.72²) over the data. (B) The log-likelihood surface peaks at the MLE. (C) With μ fixed at μ̂, the profile over σ² peaks at the divisor-n estimate, slightly left of the unbiased s².</span></figcaption>
+  </figure>
+
+  <p><strong>Interpretation.</strong> Among all normal distributions, N({{mu_mle}}, {{sd_mle}}²) is the one under which the observed strike rates are most probable. A typical player scores about 122 runs per 100 balls, and roughly two-thirds of players would lie within ±{{sd_mle}} of that if the model held.</p>
+
+  <div class="test">
+    <div class="th"><b>Shapiro–Wilk test of normality · Strike_Rate</b><span>Assumption check · Task 2</span></div>
+    <dl>
+      <dt>Hypotheses</dt><dd>H<sub>0</sub>: Strike_Rate in the population is normally distributed. &nbsp;H<sub>1</sub>: it is not.</dd>
+      <dt>Level</dt><dd><span class="num">α = 0.05</span></dd>
+      <dt>Statistic</dt><dd><span class="num">W = {{sw_W}}</span> &nbsp;(n = {{n}}; the W statistic has no degrees of freedom)</dd>
+      <dt>p-value</dt><dd><span class="num">p = {{sw_p}}</span></dd>
+      <dt>Decision</dt><dd class="decision"><span class="chip keep">Fail to reject H₀</span> p &gt; 0.05</dd>
+      <dt>Conclusion</dt><dd>There is no evidence against normality. The mild left skew ({{skew}}) comes from the bowlers’ low strike rates. With n = 30 the test has limited power, so this supports, but does not prove, the normal shape.</dd>
+    </dl>
+  </div>
+
+  <h3><span class="k">2.3</span>How MLE differs from other estimators</h3>
+  <table>
+    <caption><b>Table 2.2</b>Alternative estimators of μ and σ² · Strike_Rate</caption>
+    <thead><tr><th class="l">Parameter</th><th class="l">Estimator</th><th>Estimate</th><th class="l">Property</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td>μ</td><td class="l">Maximum likelihood (= s̄)</td><td>{{mu_mle}}</td><td class="l">Unbiased; most efficient under normality</td></tr>
+      <tr><td>μ</td><td class="l">Method of moments</td><td>{{mu_mle}}</td><td class="l">Identical to the MLE for the normal</td></tr>
+      <tr><td>μ</td><td class="l">Sample median</td><td>{{med}}</td><td class="l">Robust; less efficient under normality</td></tr>
+      <tr><td>μ</td><td class="l">10% trimmed mean</td><td>{{trim}}</td><td class="l">A compromise between mean and median</td></tr>
+      <tr class="hl"><td>σ²</td><td class="l">Maximum likelihood (divisor n)</td><td>{{s2_mle}}</td><td class="l">Biased by −σ²/n ≈ {{bias_s2}}; consistent</td></tr>
+      <tr><td>σ²</td><td class="l">Unbiased s² (divisor n − 1)</td><td>{{s2_unb}}</td><td class="l">= <span class="hat">σ</span>² × n/(n − 1)</td></tr>
+      <tr><td>σ²</td><td class="l">(1.4826 × MAD)²</td><td>{{mad_s2}}</td><td class="l">Robust; ignores the tails</td></tr>
+      <tr><td>σ²</td><td class="l">(IQR / 1.349)²</td><td>{{iqr_s2}}</td><td class="l">Robust; ignores the tails</td></tr>
+    </tbody>
+  </table>
+  <p><strong>MLE</strong> chooses the parameter values that make the observed data most probable under a <em>fully specified</em> model. Its estimates are consistent, asymptotically unbiased and efficient, and invariant: the MLE of σ is simply √<span class="hat">σ</span>². <strong>Unbiased</strong> estimators instead require E[<span class="hat">θ</span>] = θ, which is why s² divides by n − 1 and is larger than <span class="hat">σ</span>² by a factor of n/(n − 1). <strong>Method of moments</strong> matches sample moments to population moments and needs no likelihood; for the normal model it coincides with the MLE. <strong>Robust</strong> estimators (median, MAD, IQR) give up efficiency to resist outliers. Their smaller variance estimates show that the bulk of players is tighter than the classical variance suggests, because the bowlers’ low strike rates widen it. Volume I’s resampling showed the same trade-off: the divisor-n estimator, which is the MLE, had <em>lower</em> MSE than the unbiased one.</p>
+  <div class="callout"><span class="eyebrow">An assumption under strain</span>
+    <p>“Identically distributed” is doubtful. The role-specific MLEs are batters <span class="hat">μ</span> = {{bat_mu}} (<span class="hat">σ</span> = {{bat_sd}}), all-rounders {{ar_mu}} ({{ar_sd}}) and bowlers {{bowl_mu}} ({{bowl_sd}}). The pooled normal describes the squad as a whole, but the data look like a mixture of three groups. A model with role-specific means would be more faithful.</p></div>
+
+  <div class="reflections">
+    <span class="eyebrow">Reflection questions</span>
+    <div class="qa"><div class="qn">1</div><div><div class="q">What does the likelihood represent when the observations are fixed?</div>
+      <p>Once the 30 strike rates are observed, they are no longer random. The likelihood L(μ, σ²) is then a function of the <em>parameters</em>. It scores how probable (strictly, how dense) the data we actually saw would be under each candidate (μ, σ²). It is <strong>not</strong> a probability distribution over the parameters: it need not integrate to 1, and it does not say how likely a value of μ is. It ranks parameter values by how well they explain the fixed data. Figure 2B shows this as a surface whose highest point is the MLE. Values like μ = 110 sit far down the surface because they would make these data very improbable.</p></div></div>
+    <div class="qa"><div class="qn">2</div><div><div class="q">Which assumptions are important for normal maximum likelihood estimation?</div>
+      <p><strong>Independence</strong> lets the likelihood factorise into a product. <strong>Identical distribution</strong> means one μ and one σ² describe everyone; this is the weakest assumption here, given the role differences. The <strong>normal form</strong> determines the shape of the likelihood; it is supported by Shapiro–Wilk p = {{sw_p}}, though the left tail is mildly heavy. The <strong>model must be correctly specified</strong>, because if the true distribution is a mixture, the “MLE” estimates the closest normal, not the truth. Finally, a <strong>large enough n</strong> is needed for the asymptotic properties (efficiency and standard errors from the Fisher information) to be reliable. With n = 30 they are approximate, and <span class="hat">σ</span>² is visibly biased downward by about {{bias_s2}}.</p></div></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ TASK 3 ══════════════════════════════ -->
+<section class="page">
+  <div class="chapter"><div class="num">03</div><div><div class="eyebrow">Task 3</div><h2>A 95% confidence interval for the <em>mean</em></h2>
+    <div class="vars">Variable · <b>Strike_Rate</b> · method · <b>Student’s t</b> (σ unknown, n = {{n}})</div></div></div>
+
+  <h3><span class="k">3.1</span>Choosing the method</h3>
+  <p>The population standard deviation is unknown and n = 30 is modest, so the correct reference distribution for <span class="m">(x̄ − μ)/(s/√n)</span> is <strong>Student’s t with n − 1 = 29 df</strong>. The large-sample z method treats s as if it were σ. That is acceptable for large n, but here it produces intervals that are slightly too narrow: in simulation, the z-interval covered the true mean only {{cov_z_norm}}% of the time against a nominal 95%.</p>
+
+  <table>
+    <caption><b>Table 3.1</b>95% confidence interval for the mean strike rate</caption>
+    <thead><tr><th class="l">Step</th><th class="l">Formula</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Sample mean</td><td class="l">x̄</td><td>{{xbar}}</td></tr>
+      <tr><td>Sample SD</td><td class="l">s (divisor n − 1)</td><td>{{s}}</td></tr>
+      <tr><td>Standard error</td><td class="l">SE = s / √n = {{s}} / √30</td><td>{{se}}</td></tr>
+      <tr><td>Critical value</td><td class="l">t<sub>0.975, 29</sub></td><td>{{tcrit}}</td></tr>
+      <tr><td>Margin of error</td><td class="l">ME = t* × SE</td><td>{{me}}</td></tr>
+      <tr class="hl"><td><strong>95% CI (Student’s t)</strong></td><td class="l">x̄ ± ME</td><td><strong>{{ci_lo}} – {{ci_hi}}</strong></td></tr>
+      <tr><td>For comparison: z-interval</td><td class="l">x̄ ± 1.960 × SE (ME = {{mez}})</td><td>{{ciz_lo}} – {{ciz_hi}}</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Assumptions.</strong> (i) The observations are an independent random sample from the population. This is the critical caveat, because the sampling is undocumented and quota-like (Volume I). (ii) The population is roughly normal, or n is large enough for the CLT; Shapiro–Wilk p = {{sw_p}} and the mild skew make t reasonable at n = 30. (iii) There are no extreme outliers. (iv) The interval refers to a population with the same role mix as the sample.</p>
+  <p><strong>Interpretation.</strong> We are 95% confident that the mean strike rate of the population these players represent lies between <strong>{{ci_lo}} and {{ci_hi}}</strong> runs per 100 balls, or about 1.16 to 1.28 runs per ball. The interval is {{ci_width}} points wide. It contains the par of 120, but also values about 4 points below and 7.5 points above it.</p>
+
+  <figure>
+    <div class="svgwrap">{{fig:ps2/ps2_fig03_confidence_interval}}</div>
+    <figcaption><b>Figure 3</b><span>(A) 100 samples of 30 drawn from the data’s own distribution (true mean μ* = {{xbar}}). {{cover100}} of the 100 t-intervals capture μ*; misses are shown in rose. Over {{B}} repetitions, coverage was {{cov_emp}}%, and {{cov_norm}}% for normal data. (B) The margin of error shrinks with n and grows with the confidence level.</span></figcaption>
+  </figure>
+
+  <table>
+    <caption><b>Table 3.2</b>Margin of error (runs per 100 balls), with σ fixed at s = {{s}}</caption>
+    <thead><tr><th class="l">Confidence level</th><th>n = 10</th><th>n = 30</th><th>n = 60</th><th>n = 120</th></tr></thead>
+    <tbody>
+      <tr><td>90%</td><td>{{me_90_10}}</td><td>{{me_90_30}}</td><td>{{me_90_60}}</td><td>{{me_90_120}}</td></tr>
+      <tr class="hl"><td>95%</td><td>{{me_95_10}}</td><td><strong>{{me_95_30}}</strong></td><td>{{me_95_60}}</td><td>{{me_95_120}}</td></tr>
+      <tr><td>99%</td><td>{{me_99_10}}</td><td>{{me_99_30}}</td><td>{{me_99_60}}</td><td>{{me_99_120}}</td></tr>
+    </tbody>
+  </table>
+
+  <div class="reflections">
+    <span class="eyebrow">Reflection questions</span>
+    <div class="qa"><div class="qn">1</div><div><div class="q">How should a 95% confidence interval be interpreted over repeated sampling?</div>
+      <p>The 95% describes the <em>method</em>, not this particular interval. If we repeatedly drew random samples of 30 and built a t-interval each time, about 95% of those intervals would contain the true mean. Figure 3A shows this: {{cover100}} of 100 intervals did, and {{cov_emp}}% did over {{B}} repetitions. The true mean is fixed and the interval is what varies. Once computed, ({{ci_lo}}, {{ci_hi}}) either contains μ or it does not. It is wrong to say “there is a 95% probability that μ is in this interval”. We say we are 95% <em>confident</em>, meaning the interval came from a procedure that succeeds 95% of the time. The guarantee also assumes random sampling, which this dataset does not document.</p></div></div>
+    <div class="qa"><div class="qn">2</div><div><div class="q">How do confidence level, sample size and variability affect margin of error?</div>
+      <p>ME = t* × s/√n, and each factor enters directly. A <strong>higher confidence level</strong> raises t* and widens the interval: at n = 30, ME is {{me_90_30}} at 90%, {{me_95_30}} at 95% and {{me_99_30}} at 99%. A <strong>larger sample</strong> shrinks the SE like 1/√n, and also slightly lowers t*: at 95%, ME falls from {{me_95_10}} at n = 10 to {{me_95_30}} at n = 30 and {{me_95_120}} at n = 120, and halving it needs about four times the data. <strong>Greater variability</strong> raises ME proportionally. Analysing a more homogeneous group, such as one role, where the within-role SD is about {{sigma_w}} against {{s}} overall, would cut the margin of error substantially.</p></div></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ TASK 4 ══════════════════════════════ -->
+<section class="page">
+  <div class="chapter"><div class="num">04</div><div><div class="eyebrow">Task 4</div><h2>A one-sample test against <em>par</em></h2>
+    <div class="vars">Variable · <b>Strike_Rate</b> · benchmark · <b>μ₀ = {{mu0}}</b> (assumed target, pre-specified)</div></div></div>
+
+  <h3><span class="k">4.1</span>The claim and the benchmark</h3>
+  <p><strong>Claim tested:</strong> the mean strike rate of the population these players represent equals par. <strong>Benchmark:</strong> an <em>assumed target</em> of μ₀ = {{mu0}} runs per 100 balls (1.2 runs per ball, 7.2 runs per over), a conventional par for limited-overs batting. It is clearly labelled as an assumption, because the competition is undocumented. It was fixed in code before the data were loaded and was not tuned to the sample. A <strong>two-sided</strong> alternative was chosen in advance, because a departure in either direction would matter.</p>
+  <p><strong>Method:</strong> σ is unknown and n = 30, so Student’s one-sample t test is appropriate. Its assumptions are those of Task 3: independent observations, roughly normal data and no extreme outliers.</p>
+
+  <div class="test">
+    <div class="th"><b>One-sample Student’s t test · Strike_Rate</b><span>Inferential procedure · Task 4</span></div>
+    <dl>
+      <dt>Hypotheses</dt><dd>H<sub>0</sub>: μ = {{mu0}} (mean strike rate equals par). &nbsp;H<sub>1</sub>: μ ≠ {{mu0}} (it differs from par).</dd>
+      <dt>Level</dt><dd><span class="num">α = 0.05</span> &nbsp;(two-sided critical values ±t<sub>0.975, 29</sub> = ±{{tcrit}})</dd>
+      <dt>Statistic · df</dt><dd><span class="num">t = (x̄ − μ₀)/(s/√n) = ({{xbar}} − {{mu0}}) / {{se}} = {{t4}}</span> &nbsp;on <span class="num">df = {{df}}</span></dd>
+      <dt>p-value</dt><dd><span class="num">p = {{p4}}</span> (two-sided)</dd>
+      <dt>Decision</dt><dd class="decision"><span class="chip keep">Fail to reject H₀</span> |t| = {{t}} &lt; {{tcrit}} and p &gt; 0.05</dd>
+      <dt>Conclusion</dt><dd>There is no evidence at the 5% level that the mean strike rate of the population these players represent differs from par (120). This does not show the mean <em>equals</em> 120. The 95% CI ({{ci_lo}}–{{ci_hi}}) is consistent with means from about 4 points below par to 7.5 points above it.</dd>
+    </dl>
+  </div>
+
+  <figure>
+    <div class="svgwrap">{{fig:ps2/ps2_fig04_t_test}}</div>
+    <figcaption><b>Figure 4</b><span>(A) The observed t lies well inside the acceptance region. The gold tails beyond ±{{t}} make up the two-sided p-value of {{p}}. (B) The same decision through the confidence interval: μ₀ = 120 lies inside the 95% CI, so a two-sided 5% test cannot reject it.</span></figcaption>
+  </figure>
+
+  <div class="callout"><span class="eyebrow">Statistical significance versus practical importance</span>
+    <p>The observed difference is x̄ − μ₀ = {{diff}} runs per 100 balls, which is {{diff_rpb}} runs per ball or about {{diff_rpo}} runs per over. Cohen’s d = {{d}} is very small. Even if a much larger sample made this difference “significant”, it would hardly matter on the field. Conversely, the absence of significance here partly reflects low power (Task 5). Practically important departures of 5 points or more would be detected less than half the time at n = 30.</p></div>
+
+  <div class="reflections">
+    <span class="eyebrow">Reflection questions</span>
+    <div class="qa"><div class="qn">1</div><div><div class="q">What does rejecting or failing to reject the null hypothesis imply?</div>
+      <p><strong>Rejecting H₀</strong> would mean the data are unlikely (p &lt; 0.05) if the mean really were 120, so we would conclude the mean differs from par. That conclusion carries a 5% Type I error risk, and it says nothing about cause or practical size. <strong>Failing to reject</strong>, as here (p = {{p}}), means the data are compatible with a mean of 120. It is <em>not</em> proof that the mean is 120. The test simply lacked evidence of a difference, and with power of only {{power5}} against a 5-point departure, a real moderate difference could easily go undetected. The confidence interval states what remains plausible: anything from {{ci_lo}} to {{ci_hi}}.</p></div></div>
+    <div class="qa"><div class="qn">2</div><div><div class="q">Why should the benchmark be specified before examining the result?</div>
+      <p>The p-value is only valid if the hypothesis was fixed independently of the data. If the benchmark were chosen after seeing x̄ = {{xbar}}, it could be steered towards a desired conclusion. Picking 110 would guarantee “significance”, and picking 122 would guarantee its absence. Either way the 5% error rate would no longer hold. This is a form of p-hacking, or HARKing (hypothesising after the results are known). Fixing μ₀ = 120 from cricket convention, writing it into the code before loading the data, and choosing the two-sided alternative in advance keeps the test honest and reproducible.</p></div></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ TASK 5 ══════════════════════════════ -->
+<section class="page">
+  <div class="chapter"><div class="num">05</div><div><div class="eyebrow">Task 5</div><h2>Type I &amp; Type II errors, and <em>power</em></h2>
+    <div class="vars">Test · the Task 4 one-sample t test (H₀: μ = {{mu0}}, two-sided, α = 0.05, n = {{n}}) · <b>no second inferential procedure</b></div></div></div>
+
+  <h3><span class="k">5.1</span>The two decision errors, in context</h3>
+  <table>
+    <caption><b>Table 5.1</b>Decision outcomes for the strike-rate test</caption>
+    <thead><tr><th class="l" style="width:22%">Decision</th><th class="l">Truth: μ = 120 (at par)</th><th class="l">Truth: μ ≠ 120 (off par)</th></tr></thead>
+    <tbody>
+      <tr><td>Reject H₀</td><td class="l"><strong>Type I error</strong> (probability α = 0.05). We conclude the squad scores off par when it does not, which could lead to unnecessary changes to batting plans or a false claim about scoring pace.</td><td class="l">Correct decision. Its probability is the <strong>power</strong>, 1 − β.</td></tr>
+      <tr><td>Fail to reject H₀</td><td class="l">Correct decision (probability 1 − α = 0.95).</td><td class="l"><strong>Type II error</strong> (probability β). A real scoring deficit or advantage goes unnoticed, so a slow-scoring squad is wrongly reassured.</td></tr>
+    </tbody>
+  </table>
+  <p>Here we failed to reject H₀, so the only error we could have made is a <strong>Type II</strong> error. The design fixes α. β is not fixed: it depends on how far the true mean is from 120. Power is the probability that |T| exceeds the critical value, where T follows a <em>noncentral</em> t distribution with df = n − 1 and noncentrality Δ√n/σ, and Δ = μ − 120.</p>
+
+  <figure>
+    <div class="svgwrap">{{fig:ps2/ps2_fig05_error_regions}}</div>
+    <figcaption><b>Figure 5</b><span>The test rejects when x̄ falls below {{crit_lo}} or above {{crit_hi}}. If the true mean were 125, β = {{beta5}} (blue area), so a 5-point excess would be missed more often than it is detected. The rose tails are α.</span></figcaption>
+  </figure>
+
+  <h3><span class="k">5.2</span>What drives power</h3>
+  <table>
+    <caption><b>Table 5.2</b>Power of the two-sided t test (α = 0.05, n = 30) and the n needed for 80% power</caption>
+    <thead><tr><th class="l">True departure Δ</th><th>Power, σ = s = {{s}}</th><th>Power, σ = {{sigma_w}} (within role)</th><th>n for 80%, σ = s</th><th>n for 80%, σ = {{sigma_w}}</th></tr></thead>
+    <tbody>
+      <tr><td>2.5 points</td><td>{{pw_2_5_s}}</td><td>{{pw_2_5_w}}</td><td>{{n80_2_5_s}}</td><td>{{n80_2_5_w}}</td></tr>
+      <tr class="hl"><td>5 points</td><td><strong>{{pw_5_s}}</strong></td><td>{{pw_5_w}}</td><td>{{n80_5_s}}</td><td>{{n80_5_w}}</td></tr>
+      <tr><td>7.5 points</td><td>{{pw_7_5_s}}</td><td>{{pw_7_5_w}}</td><td>{{n80_7_5_s}}</td><td>{{n80_7_5_w}}</td></tr>
+      <tr><td>10 points</td><td>{{pw_10_s}}</td><td>{{pw_10_w}}</td><td>{{n80_10_s}}</td><td>{{n80_10_w}}</td></tr>
+    </tbody>
+  </table>
+  <ul class="clean">
+    <li><strong>Significance level.</strong> A larger α widens the rejection region, which raises power but also the Type I risk. At Δ = 5, power is {{pa_1}} at α = 0.01, {{pa_5}} at α = 0.05 and {{pa_10}} at α = 0.10.</li>
+    <li><strong>Sample size.</strong> A larger n shrinks the SE, so power rises steeply. At Δ = 5 it is {{pn_10}} at n = 10, {{pn_30}} at n = 30, {{pn_60}} at n = 60 and {{pn_120}} at n = 120.</li>
+    <li><strong>Variability.</strong> A smaller σ separates the H₀ and H₁ distributions. With the within-role SD of {{sigma_w}} in place of {{s}}, power at Δ = 5 rises from {{pw_5_s}} to {{pw_5_w}}.</li>
+    <li><strong>Size of the true departure.</strong> Larger departures are easier to detect: power is {{pw_2_5_s}} at Δ = 2.5 and {{pw_10_s}} at Δ = 10. To detect a departure as small as the observed {{diff}} points with 80% power would need about {{n80_obs}} players.</li>
+  </ul>
+
+  <figure>
+    <div class="svgwrap">{{fig:ps2/ps2_fig06_power}}</div>
+    <figcaption><b>Figure 6</b><span>Power curves. (A) Larger samples sharpen the curve around 120, and at μ = 120 every curve equals α. (B) Raising α buys power at the cost of more false alarms; the dot marks this study. (C) Less variability or a larger true departure both raise power. The dashed line marks the conventional 80% target.</span></figcaption>
+  </figure>
+
+  <div class="callout"><span class="eyebrow">Checking the error rates by simulation</span>
+    <p>With {{B}} simulated samples of 30 from a normal population with mean 120, the test rejected {{typeI_norm}} of the time, matching α = 0.05. Using the data’s own skewed shape shifted to mean 120, it rejected {{typeI_emp}} of the time, so the test is robust to the mild skew. At a true mean of 125, simulated power was {{power5_norm}} for normal data, against an exact {{power5}}, and {{power5_emp}} with the empirical shape. We report power for <em>pre-specified</em> departures rather than “observed power”. Observed power is just a re-expression of the p-value and adds no information.</p></div>
+
+  <div class="reflections">
+    <span class="eyebrow">Reflection questions</span>
+    <div class="qa"><div class="qn">1</div><div><div class="q">Which decision error could be more consequential in this context?</div>
+      <p>For a coach or selector, the <strong>Type II error</strong> is usually the more costly. Missing a genuine shortfall in scoring pace, for example a squad that truly scores at 112, means no corrective action, and in limited-overs cricket a pace deficit of 8 points costs runs and matches. With power of only {{power5}} against a 5-point departure, this risk is real at n = 30. A <strong>Type I error</strong> would trigger unnecessary changes to batting plans or training. That has a cost, but it is usually reversible. If the claim were used to justify an expensive or irreversible decision, such as dropping players or a public performance claim, the Type I error would matter more, and a smaller α would be justified.</p></div></div>
+    <div class="qa"><div class="qn">2</div><div><div class="q">How could power be improved without changing the significance level?</div>
+      <p>(1) <strong>Increase n.</strong> About {{n80_5_s}} players would give 80% power for a 5-point departure. (2) <strong>Reduce variability.</strong> Measure strike rate over more balls or a longer reference period. Study a more homogeneous population, such as specialist batters. Or stratify by role and use a stratified estimator: the within-role SD of {{sigma_w}} would lift power at Δ = 5 from {{pw_5_s}} to {{pw_5_w}} at the same n. (3) <strong>Use a one-sided test</strong>, but only if the direction (for example “below par”) is specified <em>before</em> seeing the data. (4) <strong>Use paired or repeated measurements</strong>, such as the same players before and after a training change, so between-player variability cancels out. (5) <strong>Improve measurement quality</strong>, for example by excluding very small numbers of balls faced.</p></div></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ CONCLUSIONS ══════════════════════════════ -->
+<section class="page">
+  <div class="chapter"><div class="num">06</div><div><div class="eyebrow">Synthesis</div><h2>Conclusions &amp; <em>limitations</em></h2>
+    <div class="vars">One variable, five lenses</div></div></div>
+
+  <table>
+    <caption><b>Table 6.1</b>Summary of findings</caption>
+    <thead><tr><th class="l" style="width:17%">Task</th><th class="l">Method</th><th class="l">Key result</th><th class="l" style="width:34%">Meaning in context</th></tr></thead>
+    <tbody>
+      <tr><td>1 · Binomial</td><td class="l">Bernoulli event S ≥ 120</td><td class="l">X = {{X}}/30; by role {{x_bat}}/{{x_ar}}/{{x_bowl}}</td><td class="l">The constant-p assumption fails. The quota design shrinks Var(X) from {{binom_var}} to {{quota_var}}.</td></tr>
+      <tr><td>2 · MLE</td><td class="l">Normal likelihood</td><td class="l"><span class="hat">μ</span> = {{mu_mle}}, <span class="hat">σ</span>² = {{s2_mle}} (s² = {{s2_unb}})</td><td class="l">The closed form is confirmed numerically. Normality is plausible (p = {{sw_p}}); identical distribution is doubtful.</td></tr>
+      <tr><td>3 · CI</td><td class="l">Student’s t, df = 29</td><td class="l">{{ci_lo}}–{{ci_hi}} (ME {{me}})</td><td class="l">The mean pace is about 1.16–1.28 runs per ball.</td></tr>
+      <tr class="hl"><td>4 · t test</td><td class="l">One-sample t against par 120</td><td class="l">t({{df}}) = {{t}}, p = {{p}}</td><td class="l">No evidence of a difference from par, and the gap is practically negligible.</td></tr>
+      <tr><td>5 · Power</td><td class="l">Noncentral t + simulation</td><td class="l">Power {{power5}} at Δ = 5; 80% needs n = {{n80_5_s}}</td><td class="l">Type II risk is substantial at n = 30.</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="k">6.1</span>Answer to the research question</h3>
+  <p>The players in this sample score at a mean pace of <strong>{{xbar}} runs per 100 balls</strong> (95% CI {{ci_lo}}–{{ci_hi}}). A normal model fitted by maximum likelihood describes the spread well (<span class="hat">σ</span> = {{sd_mle}}). {{X}} of 30 players reach the par of 120, but that rate depends strongly on role, so a simple binomial model for the count does not hold. Against the pre-specified par of 120 there is <strong>no evidence of a difference</strong> (t = {{t}}, p = {{p}}), and the observed gap of {{diff}} points is practically negligible. The test is underpowered for moderate departures, however (power {{power5}} at 5 points), so “no evidence of a difference” should not be read as “equal to par”.</p>
+
+  <h3><span class="k">6.2</span>Limitations</h3>
+  <ul class="clean">
+    <li><strong>Undocumented, quota-like sampling.</strong> Independence and representativeness cannot be assumed, and the CI and test cover random error only.</li>
+    <li><strong>Assumed benchmark.</strong> The par of 120 is a labelled assumption, not a documented figure for this competition.</li>
+    <li><strong>Strike-rate reliability.</strong> Balls faced are not recorded, so the precision of each player’s rate, especially bowlers’, is unknown.</li>
+    <li><strong>Mixture of roles.</strong> The identical-distribution and constant-p assumptions are strained by large role differences.</li>
+    <li><strong>Observational data.</strong> No causal claim is made about why some players score faster.</li>
+  </ul>
+
+  <h3><span class="k">6.3</span>Reproducibility</h3>
+  <p class="note">Run <span class="mono">python analysis_ps2.py</span> from the repository root. It reads <span class="mono">data/Dataset_13.csv</span> and writes <span class="mono">figures/ps2/</span>, <span class="mono">results/ps2/tables/</span> and <span class="mono">results/ps2/results.json</span>. Seed {{seed}} (NumPy PCG64), B = {{B}}. Python {{v_python}} · NumPy {{v_numpy}} · pandas {{v_pandas}} · SciPy {{v_scipy}} · Matplotlib {{v_matplotlib}}. The Volume I analysis (<span class="mono">analysis.py</span>) is unaffected.</p>
+</section>
+
+</body>
+</html>

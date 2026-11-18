@@ -7,6 +7,8 @@
 <a href="https://ashen-iron.github.io/maths-datathon/"><img src="https://img.shields.io/badge/Website-Live-C9A35A?style=for-the-badge&labelColor=0C1019" alt="Website"></a>
 <a href="report/MFAD_Datathon_Report.pdf"><img src="https://img.shields.io/badge/Report-PDF-C9A35A?style=for-the-badge&labelColor=0C1019" alt="Report PDF"></a>
 <a href="analysis.py"><img src="https://img.shields.io/badge/Code-analysis.py-C9A35A?style=for-the-badge&labelColor=0C1019&logo=python&logoColor=E6CC94" alt="analysis.py"></a>
+<a href="report/MFAD_Datathon_Report_PS2.pdf"><img src="https://img.shields.io/badge/Report%20PS2-PDF-C9A35A?style=for-the-badge&labelColor=0C1019" alt="Report PS2 PDF"></a>
+<a href="analysis_ps2.py"><img src="https://img.shields.io/badge/Code-analysis__ps2.py-C9A35A?style=for-the-badge&labelColor=0C1019&logo=python&logoColor=E6CC94" alt="analysis_ps2.py"></a>
 <img src="https://img.shields.io/badge/Reproducible-seed%2020261118-C9A35A?style=for-the-badge&labelColor=0C1019" alt="Reproducible">
 
 <br><br>
@@ -15,7 +17,9 @@
 
 <br><br>
 
-**[Explore the website](https://ashen-iron.github.io/maths-datathon/)** &nbsp;·&nbsp; **[Read the report](report/MFAD_Datathon_Report.pdf)** &nbsp;·&nbsp; **[Run the code](#-reproduce-in-two-commands)**
+**[Explore the website](https://ashen-iron.github.io/maths-datathon/)** &nbsp;·&nbsp; **[Read the report](report/MFAD_Datathon_Report.pdf)** &nbsp;·&nbsp; **[Run the code](#-reproduce-in-two-commands)** &nbsp;·&nbsp; **[Volume II ↓](#-volume-ii--pace-par--power)**
+
+<sub>Two volumes, one dataset: <b>Volume I</b> answers Problem Statement 1 (<code>Runs_Scored</code>) and <b>Volume II</b> answers Problem Statement 2 (<code>Strike_Rate</code>).</sub>
 
 <br>
 
@@ -79,6 +83,8 @@ One outcome (**`Runs_Scored`**) and one factor (**`Player_Role`**) carry a singl
 |:--|:--|
 | 📄 **[`report/MFAD_Datathon_Report.pdf`](report/MFAD_Datathon_Report.pdf)** | The report: answers, results, test cards, figures, observations, conclusions and all ten reflection answers |
 | 🐍 **[`analysis.py`](analysis.py)** | One Python file that runs top to bottom and reproduces every number, table and plot in the report |
+| 📄 **[`report/MFAD_Datathon_Report_PS2.pdf`](report/MFAD_Datathon_Report_PS2.pdf)** | **Problem Statement 2** report (Volume II): every task, test cards, figures and all ten reflection answers |
+| 🐍 **[`analysis_ps2.py`](analysis_ps2.py)** | **Problem Statement 2** code: runs top to bottom and reproduces every number, table and plot in the PS2 report |
 
 ## ✦ Reproduce in two commands
 
@@ -90,7 +96,13 @@ pip install -r requirements.txt
 python analysis.py
 ```
 
-This writes `figures/` (PNG + SVG), `results/tables/*.csv` and `results/results.json`, and prints a full console report. All resampling uses a fixed seed (`20261118`, B = 20,000), so every run gives identical numbers.
+For Problem Statement 2:
+
+```bash
+python analysis_ps2.py
+```
+
+These write `figures/` and `figures/ps2/` (PNG + SVG), `results/tables/` and `results/ps2/tables/` (CSV), and `results/results.json` and `results/ps2/results.json`, and print a full console report. All resampling uses a fixed seed (`20261118`, B = 20,000), so every run gives identical numbers.
 
 <details>
 <summary><b>Optional: rebuild the PDF report and the website</b></summary>
@@ -110,32 +122,40 @@ npx playwright install chromium
 node tools/build.cjs
 ```
 
-To put your team name and members on the PDF cover, fill in `report/meta.json` and rebuild.
+This rebuilds both PDFs and both website pages. To put your team name and members on the PDF covers, fill in `report/meta.json` and rebuild.
 </details>
 
 ## ✦ Repository structure
 
 ```text
 maths-datathon/
-├── analysis.py                  ← the submission code: all statistics, tables and figures
+├── analysis.py                  ← PS1 submission code: all statistics, tables and figures
+├── analysis_ps2.py              ← PS2 submission code (Volume II)
 ├── data/Dataset_13.csv          ← the assigned dataset, unmodified
 ├── report/
-│   ├── MFAD_Datathon_Report.pdf ← the submission report
-│   ├── template.html            ← report layout (placeholders filled from results.json)
-│   ├── report.html              ← generated HTML source of the PDF
+│   ├── MFAD_Datathon_Report.pdf ← PS1 submission report
+│   ├── MFAD_Datathon_Report_PS2.pdf ← PS2 submission report
+│   ├── report.css               ← shared report styling
+│   ├── template.html            ← PS1 report layout (placeholders filled from results.json)
+│   ├── template_ps2.html        ← PS2 report layout
+│   ├── report.html, report_ps2.html ← generated HTML sources of the PDFs
 │   └── meta.json                ← team name / members for the cover
-├── figures/                     ← fig01–fig08 as PNG and SVG (generated)
+├── figures/                     ← PS1 fig01–fig08, PNG + SVG (generated)
+│   └── ps2/                     ← PS2 figures (generated)
 ├── results/
-│   ├── results.json             ← every reported number (generated)
-│   └── tables/*.csv             ← every reported table (generated)
+│   ├── results.json             ← every PS1 number (generated)
+│   ├── tables/*.csv             ← every PS1 table (generated)
+│   └── ps2/                     ← PS2 results.json and tables (generated)
 ├── docs/                        ← the website (GitHub Pages)
-│   ├── index.html
+│   ├── index.html               ← Volume I
+│   ├── ps2.html                 ← Volume II
 │   ├── assets/{css,js,fonts,img,vendor}
-│   └── downloads/               ← PDF, analysis.py and CSV offered on the site
+│   └── downloads/               ← both PDFs, both .py files and the CSV
 ├── tools/
 │   ├── build.cjs                ← builds the PDF, the website and the README banner
-│   ├── site.template.html       ← website template
-│   └── banner.html              ← README banner and social card
+│   ├── site.template.html       ← Volume I website template
+│   ├── site_ps2.template.html   ← Volume II website template
+│   └── banner.html              ← README banners and social card
 ├── assets/fonts/                ← bundled typefaces (SIL Open Font License)
 ├── requirements.txt · package.json · .gitignore
 └── README.md
@@ -150,9 +170,50 @@ maths-datathon/
 - **χ².** The expected distribution was fixed *before* counting: five classes equally probable under the fitted normal model, 6 expected per class, df = K − 1 − 2. A Chernoff–Lehmann bound is reported.
 - **Throughout.** Every test reports H₀/H₁, α, the statistic, df, the p-value and a conclusion in context. Statistical significance is kept separate from practical importance, and no result is read causally.
 
+## ✦ Volume II · Pace, Par & Power
+
+<div align="center">
+<img src="docs/assets/img/banner-ps2.png" alt="Pace, Par &amp; Power: MFAD Datathon, Problem Statement 2, Dataset 13" width="100%">
+</div>
+
+> **Problem Statement 2.** How fast do these players score? Can strike rate be modelled as a random variable, both binomially through a par-or-better event and normally by maximum likelihood? How precisely can its mean be estimated, does that mean differ from a **pre-specified par of 120 runs per 100 balls**, and how much power does that test have?
+
+<table>
+<tr>
+<td width="20%" align="center"><sub>TASK 1 · BINOMIAL</sub><br><h3>18 / 30</h3><sub>at par or better<br>by role 10 · 7 · 1 (p not constant)</sub></td>
+<td width="20%" align="center"><sub>TASK 2 · NORMAL MLE</sub><br><h3>121.93</h3><sub>μ̂ · σ̂² = 216.80<br>(s² = 224.27)</sub></td>
+<td width="20%" align="center"><sub>TASK 3 · 95% CI (t)</sub><br><h3>116.34–127.53</h3><sub>SE 2.734 · ME 5.59</sub></td>
+<td width="20%" align="center"><sub>TASK 4 · t TEST</sub><br><h3>t = 0.707</h3><sub>df 29 · p = 0.485<br>fail to reject H₀: μ = 120</sub></td>
+<td width="20%" align="center"><sub>TASK 5 · POWER</sub><br><h3>0.424</h3><sub>at Δ = 5 points<br>80% needs n = 73</sub></td>
+</tr>
+</table>
+
+| | Task | Method | Result | Meaning in context |
+|:-:|:--|:--|:--|:--|
+| **I** | Random variables & binomial | Bernoulli event S ≥ 120; X ~ Bin(30, p)? | X = 18; roles 10/7/1 of 10 | Constant p fails. The 10/10/10 quota shrinks Var(X) from 7.20 to 3.00. |
+| **II** | Normal MLE | Likelihood, score equations, numerical check | μ̂ = 121.93, σ̂² = 216.80 | The closed form is confirmed by an optimiser. Normality is plausible (Shapiro–Wilk p = 0.339). |
+| **III** | 95% CI for μ | Student’s t (σ unknown, n = 30) | 116.34 – 127.53 | 97 of 100 repeated intervals captured the mean. A z-interval would under-cover. |
+| **IV** | One-sample test | t test against assumed par 120 (fixed in code before loading the data) | t(29) = 0.707, p = 0.485 | No evidence the mean differs from par, and the gap of 1.93 is practically negligible (d = 0.13). |
+| **V** | Type I / II & power | Exact noncentral-t power + simulation | Power 0.424 at Δ = 5 | Type II risk is real at n = 30. Within-role σ would lift power to 0.846. |
+
+<table>
+<tr>
+<td width="50%"><img src="figures/ps2/ps2_fig03_confidence_interval.png" alt="Repeated sampling"><br><sub><b>PS2 · FIG 3</b> · 100 repeated-sample t-intervals, and the margin of error by n and level</sub></td>
+<td width="50%"><img src="figures/ps2/ps2_fig05_error_regions.png" alt="Error regions"><br><sub><b>PS2 · FIG 5</b> · Type I and Type II error regions when the true mean is 125</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="figures/ps2/ps2_fig02_likelihood.png" alt="Likelihood"><br><sub><b>PS2 · FIG 2</b> · Fitted normal, log-likelihood surface and profile over σ²</sub></td>
+<td width="50%"><img src="figures/ps2/ps2_fig06_power.png" alt="Power"><br><sub><b>PS2 · FIG 6</b> · How n, α, σ and the true departure drive power</sub></td>
+</tr>
+</table>
+
+**Volume II submission files:** 📄 [`report/MFAD_Datathon_Report_PS2.pdf`](report/MFAD_Datathon_Report_PS2.pdf) · 🐍 [`analysis_ps2.py`](analysis_ps2.py) &nbsp;·&nbsp; **Website:** [`docs/ps2.html`](https://ashen-iron.github.io/maths-datathon/ps2.html)
+
+<div align="center"><img src="docs/assets/img/divider.svg" width="70%" alt=""></div>
+
 ## ✦ The website
 
-The [`docs/`](docs) folder holds a self-contained website with an animated Central Limit Theorem hero, interactive D3 charts, an estimator lab and a CLT lab. It runs offline and needs no build step to view.
+The [`docs/`](docs) folder holds a self-contained, two-volume website. **Volume I** (`index.html`) has an animated Central Limit Theorem hero, interactive D3 charts, an estimator lab and a CLT lab. **Volume II** (`ps2.html`) has a live "loom" of confidence intervals as its hero, plus a binomial explorer, likelihood explorer, interval lab, t-test explorer and power explorer. Switch between volumes with the **I · II** control in the navigation bar. The site runs offline and needs no build step to view.
 
 **Publish it:** go to repository **Settings → Pages → Build and deployment**, set **Source** to *Deploy from a branch*, choose the branch, select the **`/docs`** folder and save. It will appear at `https://ashen-iron.github.io/maths-datathon/`.
 
@@ -164,5 +225,5 @@ Typefaces: [Cormorant Garamond](https://fonts.google.com/specimen/Cormorant+Gara
 <br>
 <img src="docs/assets/img/divider.svg" width="50%" alt="">
 <br>
-<sub>PES UNIVERSITY &nbsp;·&nbsp; MFAD DATATHON 2026 &nbsp;·&nbsp; PROBLEM STATEMENT 1 &nbsp;·&nbsp; DATASET 13</sub>
+<sub>PES UNIVERSITY &nbsp;·&nbsp; MFAD DATATHON 2026 &nbsp;·&nbsp; PROBLEM STATEMENTS 1 &amp; 2 &nbsp;·&nbsp; DATASET 13</sub>
 </div>

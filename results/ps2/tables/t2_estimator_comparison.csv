@@ -1,0 +1,9 @@
+Parameter,Estimator,Estimate,Property
+Mean μ,Maximum likelihood (= sample mean x̄),121.9333,Unbiased; efficient under normality
+Mean μ,Method of moments,121.9333,Identical to the MLE for the normal model
+Mean μ,Sample median,123.55,Robust to outliers; less efficient under normality
+Mean μ,10% trimmed mean,122.8583,Compromise between mean and median
+Variance σ²,Maximum likelihood σ̂² (divisor n),216.7989,Biased by −σ²/n; consistent
+Variance σ²,Unbiased s² (divisor n − 1),224.2747,Unbiased; slightly larger
+Variance σ²,(1.4826 × MAD)²,158.8134,Robust scale estimate
+Variance σ²,(IQR / 1.349)²,140.2355,Robust scale estimate

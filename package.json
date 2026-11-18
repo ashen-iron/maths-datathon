@@ -2,11 +2,12 @@
   "name": "maths-datathon",
   "version": "1.0.0",
   "private": true,
-  "description": "Runs, Roles & Randomness: MFAD Datathon, Problem Statement 1, Dataset 13. Build tooling for the PDF report and website.",
+  "description": "Runs, Roles & Randomness (PS1) and Pace, Par & Power (PS2): MFAD Datathon, Dataset 13. Build tooling for the PDF reports and website.",
   "scripts": {
     "analysis": "python analysis.py",
     "build": "node tools/build.cjs",
-    "all": "python analysis.py && node tools/build.cjs"
+    "all": "python analysis.py && python analysis_ps2.py && node tools/build.cjs",
+    "analysis_ps2": "python analysis_ps2.py"
   },
   "devDependencies": {
     "playwright": "^1.63.0"
