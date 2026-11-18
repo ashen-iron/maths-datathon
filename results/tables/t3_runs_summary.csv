@@ -1,0 +1,14 @@
+,value
+n,30.0
+mean,213.6
+median,219.0
+sd,81.954
+min,70.0
+q1,163.75
+q3,267.5
+iqr,103.75
+max,389.0
+range,319.0
+skewness,0.099
+excess_kurtosis,-0.386
+cv_pct,38.368

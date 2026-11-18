@@ -1,0 +1,4 @@
+Role,Expected_prob,Observed,Expected,(O-E)^2/E
+Batter,0.3333,10,10.0,0.0
+All-rounder,0.3333,10,10.0,0.0
+Bowler,0.3333,10,10.0,0.0

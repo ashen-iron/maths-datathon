@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Banner</title>
+<link rel="stylesheet" href="../docs/assets/css/fonts.css">
+<style>
+  html,body{margin:0;background:#07090D}
+  body{width:100vw;height:100vh;overflow:hidden;position:relative;color:#EFE7D7;font-family:'Jost',sans-serif;font-weight:300}
+  .bg{position:absolute;inset:0;background:radial-gradient(900px 700px at 86% 0%,rgba(201,163,90,.20),transparent 60%),radial-gradient(900px 600px at 0% 110%,rgba(84,134,211,.13),transparent 60%),linear-gradient(180deg,#07090D,#0B0E15)}
+  .frame{position:absolute;inset:26px;border:1px solid rgba(201,163,90,.45)}
+  .frame::after{content:"";position:absolute;inset:6px;border:1px solid rgba(201,163,90,.16)}
+  .rings{position:absolute;right:-180px;top:-260px;width:900px;opacity:.95}
+  .content{position:absolute;left:96px;top:92px;right:96px}
+  .kicker{display:flex;align-items:center;gap:18px;font-size:15px;letter-spacing:.38em;text-transform:uppercase;color:#C9A35A}
+  .kicker:before{content:"";width:64px;height:1px;background:#C9A35A}
+  h1{margin:30px 0 0;font-family:'Cormorant Garamond';font-weight:300;font-size:138px;line-height:.88;letter-spacing:-.02em;color:#FBF5EA}
+  h1 em{font-style:italic;background:linear-gradient(100deg,#A77C33 0%,#E9D3A0 38%,#C9A35A 60%,#F3E2BA 80%,#B88A3E 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .stats{position:absolute;left:96px;bottom:84px;display:flex;gap:0;border-top:1px solid rgba(236,226,207,.18)}
+  .stats div{padding:20px 44px 0 0;margin-right:44px;border-right:1px solid rgba(236,226,207,.09)}
+  .stats div:last-child{border-right:0}
+  .stats b{display:block;font-weight:200;font-size:44px;line-height:1;color:#FBF5EA}
+  .stats span{display:block;margin-top:10px;font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:#8F8878}
+  .stats i{font-family:'EB Garamond';font-style:italic}
+  svg.curve{position:absolute;right:96px;bottom:84px;width:560px;height:240px}
+  .social .content{left:80px;top:80px}.social h1{font-size:112px}.social .stats{left:80px;bottom:70px}.social .stats div{padding-right:30px;margin-right:30px}.social .stats b{font-size:36px}
+  .social svg.curve{display:none}
+</style></head>
+<body>
+<div class="bg"></div>
+<svg class="rings" viewBox="0 0 200 200"><g fill="none" stroke="#C9A35A">
+  <circle cx="100" cy="100" r="98" stroke-opacity=".10" stroke-width=".18"/><circle cx="100" cy="100" r="82" stroke-opacity=".14" stroke-width=".18" stroke-dasharray=".6 1.4"/>
+  <circle cx="100" cy="100" r="64" stroke-opacity=".18" stroke-width=".18"/><circle cx="100" cy="100" r="46" stroke-opacity=".22" stroke-width=".18"/>
+  <circle cx="100" cy="100" r="30" stroke-opacity=".26" stroke-width=".18"/><rect x="97.4" y="87" width="5.2" height="26" stroke-opacity=".45" stroke-width=".22"/>
+  <path d="M95.5 90.5h9M95.5 109.5h9" stroke-opacity=".45" stroke-width=".18"/></g></svg>
+<div class="frame"></div>
+<div class="content">
+  <div class="kicker">MFAD Datathon · Problem Statement 1 · Dataset 13</div>
+  <h1>Runs, Roles<br>&amp; <em>Randomness</em></h1>
+</div>
+<div class="stats" id="stats"></div>
+<svg class="curve" id="curve" viewBox="0 0 560 240"></svg>
+<script>
+  const q = JSON.parse(decodeURIComponent(location.search.slice(1) || '%7B%7D'));
+  if (q.social) document.body.classList.add('social');
+  document.getElementById('stats').innerHTML = [
+    ['30', 'Players'], [q.xbar, 'Mean runs'], ['F = ' + q.F, 'ANOVA'], ['<i>η</i>² = ' + q.eta2, 'Role effect']
+  ].map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('');
+  // hairline bell curve
+  const svg = document.getElementById('curve'); let s = '<defs><linearGradient id="g" gradientUnits="userSpaceOnUse" x1="0" y1="230" x2="0" y2="40"><stop offset="0" stop-color="#C9A35A" stop-opacity=".95"/><stop offset="1" stop-color="#F3E3BF" stop-opacity=".25"/></linearGradient></defs>';
+  let d = '';
+  for (let i = 0; i <= 560; i += 3.2) { const z = (i - 280) / 92, h = Math.exp(-z * z / 2) * 190; s += `<line x1="${i}" x2="${i}" y1="230" y2="${230 - h}" stroke="url(#g)" stroke-width="1.1" opacity="${0.2 + 0.7 * Math.exp(-z * z / 2)}"/>`; d += (i ? 'L' : 'M') + i + ',' + (229.5 - h); }
+  s += `<path d="${d}" fill="none" stroke="#E7CF9A" stroke-width="1.2"/><line x1="0" x2="560" y1="230" y2="230" stroke="#C9A35A" stroke-opacity=".6"/>`;
+  svg.innerHTML = s;
+</script>
+</body></html>

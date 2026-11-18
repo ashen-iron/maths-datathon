@@ -1,0 +1,8 @@
+Variable,Type,Meaning,Use in this study
+Player_ID,Identifier,Label PL01–PL30,Excluded from all calculations
+Practice_Hours,Numerical (continuous),Hours of practice (reference period undocumented),Context
+Runs_Scored,Numerical (discrete count),Runs scored (reference period undocumented),Primary outcome (Tasks 1–5)
+Strike_Rate,Numerical (continuous),Runs per 100 balls faced,Context
+Matches_Played,Numerical (discrete count),Number of matches played,Context
+Fitness_Score,Numerical (score),Fitness rating (scale undocumented),Context
+Player_Role,"Categorical (nominal, 3 levels)",Batter / All-rounder / Bowler,Grouping factor (Tasks 4–5)

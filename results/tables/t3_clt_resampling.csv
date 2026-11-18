@@ -1,0 +1,13 @@
+parent,n,mean_of_means,sd_of_means,theory_sd,skewness,excess_kurtosis
+Runs_Scored,1,213.9373,80.3724,80.5761,0.081,-0.5187
+Runs_Scored,2,214.0988,57.0859,56.9759,0.0548,-0.253
+Runs_Scored,5,213.5309,36.1508,36.0347,0.0295,-0.0868
+Runs_Scored,10,213.3926,25.319,25.4804,0.0379,-0.1171
+Runs_Scored,30,213.6813,14.7627,14.7111,0.0079,-0.0404
+Runs_Scored,50,213.6089,11.4122,11.3952,-0.0046,0.016
+High-output indicator (Runs ≥ 300),1,0.1644,0.3706,0.3727,1.8114,1.2812
+High-output indicator (Runs ≥ 300),2,0.1644,0.2619,0.2635,1.278,0.6317
+High-output indicator (Runs ≥ 300),5,0.1654,0.1662,0.1667,0.8008,0.2436
+High-output indicator (Runs ≥ 300),10,0.1663,0.1184,0.1179,0.5932,0.1779
+High-output indicator (Runs ≥ 300),30,0.1666,0.0688,0.068,0.3378,0.0456
+High-output indicator (Runs ≥ 300),50,0.1667,0.0528,0.0527,0.2716,0.0502

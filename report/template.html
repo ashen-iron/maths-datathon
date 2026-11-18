@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Runs, Roles &amp; Randomness — MFAD Datathon Report</title>
+<style>
+/* ───────────────────────── Fonts (bundled, OFL) ───────────────────────── */
+@font-face{font-family:'Cormorant Garamond';font-weight:300;src:url('../assets/fonts/CormorantGaramond-300.ttf')}
+@font-face{font-family:'Cormorant Garamond';font-weight:400;src:url('../assets/fonts/CormorantGaramond-400.ttf')}
+@font-face{font-family:'Cormorant Garamond';font-weight:500;src:url('../assets/fonts/CormorantGaramond-500.ttf')}
+@font-face{font-family:'Cormorant Garamond';font-weight:600;src:url('../assets/fonts/CormorantGaramond-600.ttf')}
+@font-face{font-family:'Cormorant Garamond';font-weight:300;font-style:italic;src:url('../assets/fonts/CormorantGaramond-300Italic.ttf')}
+@font-face{font-family:'Cormorant Garamond';font-weight:400;font-style:italic;src:url('../assets/fonts/CormorantGaramond-400Italic.ttf')}
+@font-face{font-family:'Cormorant Garamond';font-weight:500;font-style:italic;src:url('../assets/fonts/CormorantGaramond-500Italic.ttf')}
+@font-face{font-family:'EB Garamond';font-weight:400;src:url('../assets/fonts/EBGaramond-400.ttf')}
+@font-face{font-family:'EB Garamond';font-weight:500;src:url('../assets/fonts/EBGaramond-500.ttf')}
+@font-face{font-family:'EB Garamond';font-weight:400;font-style:italic;src:url('../assets/fonts/EBGaramond-400Italic.ttf')}
+@font-face{font-family:'EB Garamond';font-weight:500;font-style:italic;src:url('../assets/fonts/EBGaramond-500Italic.ttf')}
+@font-face{font-family:'Jost';font-weight:300;src:url('../assets/fonts/Jost-300.ttf')}
+@font-face{font-family:'Jost';font-weight:400;src:url('../assets/fonts/Jost-400.ttf')}
+@font-face{font-family:'Jost';font-weight:500;src:url('../assets/fonts/Jost-500.ttf')}
+@font-face{font-family:'Jost';font-weight:600;src:url('../assets/fonts/Jost-600.ttf')}
+@font-face{font-family:'DM Mono';font-weight:400;src:url('../assets/fonts/DMMono-400.ttf')}
+
+:root{
+  --paper:#FBF8F2; --paper-2:#F4EEE2; --ink:#141A26; --ink-2:#3B3F47; --muted:#7A756B;
+  --hair:#E6DECD; --rule:#CDBFA5; --gold:#B07A1F; --gold-2:#C9A35A; --gold-soft:#EFE4CC;
+  --night:#0C1019; --night-2:#141A26; --ivory:#F3EBDD;
+  --bat:#B07A1F; --ar:#2E5FA8; --bowl:#B23A5E;
+  --serif:'EB Garamond','Cormorant Garamond',Georgia,serif;
+  --display:'Cormorant Garamond','EB Garamond',Georgia,serif;
+  --sans:'Jost','EB Garamond',Helvetica,Arial,sans-serif;
+  --mono:'DM Mono',ui-monospace,monospace;
+}
+
+/* ───────────────────────── Page model ───────────────────────── */
+@page{
+  size:A4; margin:21mm 19mm 21mm 19mm; background:#FBF8F2;
+  @top-left{content:"Runs, Roles & Randomness";font-family:'Cormorant Garamond';font-style:italic;font-size:10pt;color:#7A756B;vertical-align:bottom;padding-bottom:5mm}
+  @top-right{content:"MFAD Datathon  ·  Problem Statement 1  ·  Dataset 13";font-family:'Jost';font-size:6.6pt;letter-spacing:.18em;color:#9A9385;text-transform:uppercase;vertical-align:bottom;padding-bottom:5.6mm}
+  @bottom-left{content:"PES University";font-family:'Jost';font-size:6.6pt;letter-spacing:.2em;color:#9A9385;text-transform:uppercase;vertical-align:top;padding-top:5mm}
+  @bottom-right{content:counter(page, decimal-leading-zero);font-family:'Cormorant Garamond';font-size:12pt;color:#B07A1F;vertical-align:top;padding-top:4mm}
+}
+@page cover{margin:0;background:#0C1019;@top-left{content:none}@top-right{content:none}@bottom-left{content:none}@bottom-right{content:none}}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:10.6pt;line-height:1.52;
+     font-variant-numeric:lining-nums;-webkit-print-color-adjust:exact;print-color-adjust:exact;hyphens:auto;font-kerning:normal}
+*{box-sizing:border-box}
+p{margin:0 0 .72em;text-align:justify;text-justify:inter-word;orphans:3;widows:3}
+.page{break-before:page}
+h1,h2,h3,h4{margin:0;font-weight:normal}
+strong{font-weight:500}
+em{font-style:italic}
+sub,sup{font-size:.68em;line-height:0}
+.m{font-family:'EB Garamond',serif;font-style:italic;white-space:nowrap}
+.bar,.hat{position:relative;display:inline-block;font-family:'EB Garamond',serif;font-style:italic;line-height:1}
+.bar::after{content:"";position:absolute;left:.12em;right:.02em;top:.08em;border-top:.055em solid currentColor}
+.hat::after{content:"ˆ";position:absolute;left:0;right:0;top:-.34em;text-align:center;font-style:normal;font-size:.9em;padding-left:.12em}
+.mono{font-family:var(--mono);font-size:.86em;letter-spacing:-.01em}
+.nw{white-space:nowrap}
+
+/* ───────────────────────── Cover ───────────────────────── */
+.cover{page:cover;position:relative;width:210mm;height:297mm;overflow:hidden;background:var(--night);color:var(--ivory)}
+.cover .glow{position:absolute;inset:0;background:
+  radial-gradient(120mm 120mm at 168mm 58mm, rgba(201,163,90,.20), rgba(201,163,90,0) 70%),
+  radial-gradient(160mm 120mm at 20mm 280mm, rgba(46,95,168,.16), rgba(46,95,168,0) 70%)}
+.cover .frame{position:absolute;inset:11mm;border:.35pt solid rgba(201,163,90,.55)}
+.cover .frame:after{content:"";position:absolute;inset:1.6mm;border:.25pt solid rgba(201,163,90,.22)}
+.cover .rings{position:absolute;right:-38mm;top:-30mm;width:190mm;height:190mm;opacity:.9}
+.cover .top{position:absolute;left:22mm;right:22mm;top:22mm;display:flex;justify-content:space-between;
+  font-family:var(--sans);font-size:7pt;letter-spacing:.32em;text-transform:uppercase;color:rgba(243,235,221,.72)}
+.cover .mark{display:flex;align-items:center;gap:3mm}
+.cover .mono-mark{width:9mm;height:9mm;border:.5pt solid var(--gold-2);border-radius:50%;display:grid;place-items:center;
+  font-family:var(--display);font-style:italic;font-size:12pt;letter-spacing:0;color:var(--gold-2)}
+.cover .titleblock{position:absolute;left:22mm;right:22mm;top:78mm}
+.cover .kicker{font-family:var(--sans);font-size:7.6pt;letter-spacing:.34em;text-transform:uppercase;color:var(--gold-2);margin-bottom:9mm;display:flex;align-items:center;gap:4mm}
+.cover .kicker:before{content:"";width:14mm;height:.4pt;background:var(--gold-2)}
+.cover h1{font-family:var(--display);font-weight:300;font-size:64pt;line-height:.92;letter-spacing:-.012em;color:#FBF6EC}
+.cover h1 em{font-weight:400;color:var(--gold-2)}
+.cover .sub{margin-top:9mm;max-width:128mm;font-family:var(--serif);font-style:italic;font-size:13.2pt;line-height:1.45;color:rgba(243,235,221,.78)}
+.cover .stats{position:absolute;left:22mm;right:22mm;top:180mm;display:grid;grid-template-columns:repeat(4,1fr);border-top:.4pt solid rgba(201,163,90,.45)}
+.cover .stat{padding:5mm 4mm 0 0}
+.cover .stat b{display:block;font-family:var(--sans);font-weight:300;font-size:22pt;line-height:1;color:#FBF6EC;letter-spacing:-.01em}
+.cover .stat span{display:block;margin-top:2.6mm;font-family:var(--sans);font-size:6.6pt;letter-spacing:.24em;text-transform:uppercase;color:rgba(243,235,221,.6)}
+.cover .curve{position:absolute;left:22mm;right:22mm;bottom:41mm;height:44mm}
+.cover .curve svg{width:100%;height:100%;overflow:visible}
+.gk{font-family:'EB Garamond',serif;font-style:italic;text-transform:none;letter-spacing:.02em;font-size:1.25em}
+.cover .foot{position:absolute;left:22mm;right:22mm;bottom:20mm;display:flex;justify-content:space-between;align-items:flex-end;
+  font-family:var(--sans);font-size:6.8pt;letter-spacing:.22em;text-transform:uppercase;color:rgba(243,235,221,.55)}
+.cover .foot .team{color:rgba(243,235,221,.85);letter-spacing:.16em}
+.cover .foot .team b{display:block;font-family:var(--display);font-weight:400;font-style:italic;font-size:15pt;letter-spacing:0;text-transform:none;color:#FBF6EC;margin-top:1.6mm}
+
+/* ───────────────────────── Headings ───────────────────────── */
+.eyebrow{font-family:var(--sans);font-weight:500;font-size:7.2pt;letter-spacing:.28em;text-transform:uppercase;color:var(--gold)}
+.chapter{display:grid;grid-template-columns:30mm 1fr;column-gap:6mm;align-items:end;padding-bottom:5mm;margin-bottom:7mm;border-bottom:.5pt solid var(--rule);position:relative}
+.chapter:after{content:"";position:absolute;left:0;bottom:-.5pt;width:30mm;height:1.4pt;background:var(--gold)}
+.chapter .num{font-family:var(--display);font-weight:300;font-size:66pt;line-height:.8;color:var(--gold);letter-spacing:-.03em}
+.chapter h2{font-family:var(--display);font-weight:500;font-size:27pt;line-height:1.02;letter-spacing:-.005em;margin-top:2mm}
+.chapter h2 em{font-weight:400;color:var(--gold)}
+.chapter .vars{margin-top:2.6mm;font-family:var(--sans);font-size:7.4pt;color:var(--muted);letter-spacing:.04em}
+.chapter .vars b{font-weight:500;color:var(--ink-2)}
+h3{font-family:var(--display);font-weight:600;font-size:15pt;line-height:1.15;margin:6.5mm 0 2.4mm;color:var(--ink);break-after:avoid}
+h3 .k{font-family:var(--sans);font-weight:500;font-size:7pt;letter-spacing:.24em;color:var(--gold);margin-right:2.6mm;vertical-align:2pt}
+h4{font-family:var(--sans);font-weight:500;font-size:7.6pt;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2);margin:4.5mm 0 1.8mm;break-after:avoid}
+.lead{font-family:var(--display);font-style:italic;font-weight:400;font-size:14.2pt;line-height:1.36;color:var(--ink-2);margin-bottom:5mm;text-align:left}
+
+/* ───────────────────────── Blocks ───────────────────────── */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:7mm}
+.callout{background:var(--paper-2);border-left:1.4pt solid var(--gold);padding:3.4mm 4.6mm;margin:3.6mm 0 4.4mm;break-inside:avoid}
+.callout p:last-child{margin-bottom:0}
+.callout .eyebrow{display:block;margin-bottom:1.4mm}
+.note{font-size:9.4pt;color:var(--ink-2)}
+ul.clean{margin:0 0 .8em;padding-left:4.6mm}
+ul.clean li{margin:0 0 .3em;padding-left:1mm}
+ul.clean li::marker{color:var(--gold);content:"◆  ";font-size:.6em}
+.eq{font-family:'EB Garamond',serif;font-style:italic;font-size:12pt;text-align:center;margin:2.6mm 0 3.6mm;color:var(--ink)}
+.eq .lbl{font-family:var(--sans);font-style:normal;font-size:6.8pt;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-left:5mm}
+
+/* Test card: every inferential procedure is reported in the same format */
+.test{border-top:1.2pt solid var(--ink);border-bottom:.5pt solid var(--rule);margin:4.4mm 0 5mm;break-inside:avoid;background:linear-gradient(180deg,rgba(239,228,204,.35),rgba(239,228,204,0) 40%)}
+.test .th{display:flex;justify-content:space-between;align-items:baseline;padding:2.4mm 0 2mm;border-bottom:.4pt solid var(--hair)}
+.test .th b{font-family:var(--display);font-weight:600;font-size:12.6pt}
+.test .th span{font-family:var(--sans);font-size:6.8pt;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+.test dl{display:grid;grid-template-columns:27mm 1fr;margin:0}
+.test dt,.test dd{margin:0;padding:1.55mm 0;border-bottom:.3pt solid var(--hair)}
+.test dt{font-family:var(--sans);font-weight:500;font-size:6.8pt;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding-top:2mm}
+.test dd{font-size:10.2pt}
+.test dd .num{font-family:var(--sans);font-weight:400;font-size:9.4pt;font-variant-numeric:tabular-nums}
+.test dt:nth-last-of-type(1),.test dd:last-child{border-bottom:none}
+.test .decision{font-weight:500}
+.chip{display:inline-block;font-family:var(--sans);font-weight:500;font-size:6.6pt;letter-spacing:.18em;text-transform:uppercase;padding:.5mm 2mm;border-radius:6mm;vertical-align:1pt;margin-right:1.6mm}
+.chip.rej{background:#141A26;color:#F3EBDD}
+.chip.keep{background:var(--gold-soft);color:#7A5410}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;margin:2.4mm 0 4.6mm;font-family:var(--sans);font-size:8.3pt;font-variant-numeric:tabular-nums lining-nums;break-inside:avoid}
+caption{caption-side:top;text-align:left;font-family:var(--sans);font-size:6.8pt;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);padding-bottom:1.8mm}
+caption b{color:var(--gold);font-weight:500;margin-right:2mm}
+thead th{font-weight:500;font-size:6.6pt;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);text-align:right;padding:1.6mm 1.8mm;border-top:1pt solid var(--ink);border-bottom:.5pt solid var(--rule)}
+thead th:first-child,tbody td:first-child{text-align:left}
+tbody td{padding:1.15mm 1.8mm;text-align:right;border-bottom:.3pt solid var(--hair);color:var(--ink)}
+tbody tr:last-child td{border-bottom:.6pt solid var(--rule)}
+tbody tr.total td{font-weight:500;border-top:.5pt solid var(--rule)}
+tbody tr.hl td{background:rgba(239,228,204,.55)}
+td.l,th.l{text-align:left!important}
+.sw{display:inline-block;width:2.2mm;height:2.2mm;border-radius:50%;margin-right:1.8mm;vertical-align:.1mm}
+
+/* Figures */
+figure{margin:3mm 0 5.4mm;break-inside:avoid}
+figure .svgwrap svg{width:100%;height:auto;display:block}
+figcaption{display:grid;grid-template-columns:20mm 1fr;gap:3mm;margin-top:2mm;padding-top:2mm;border-top:.4pt solid var(--hair);font-size:9.2pt;line-height:1.4;color:var(--ink-2)}
+figcaption b{font-family:var(--sans);font-weight:500;font-size:6.8pt;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);padding-top:.6mm}
+figcaption span{font-style:italic}
+
+/* Reflections */
+.reflections{margin-top:6mm;border-top:.5pt solid var(--rule);padding-top:1mm}
+.reflections > .eyebrow{display:block;margin:3mm 0 1mm}
+.qa{display:grid;grid-template-columns:12mm 1fr;column-gap:4mm;padding:3.4mm 0;border-bottom:.3pt solid var(--hair)}
+.qa:last-child{border-bottom:none}
+.qa .qn{font-family:var(--display);font-weight:300;font-size:28pt;line-height:.9;color:var(--gold)}
+.qa .q{font-family:var(--display);font-weight:600;font-size:12.8pt;line-height:1.25;margin-bottom:1.6mm;color:var(--ink)}
+.qa p:last-child{margin-bottom:0}
+
+/* Summary cards */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1pt solid var(--ink);margin:3mm 0 6mm}
+.card{padding:4.4mm 4.6mm 4.4mm 0;border-bottom:.4pt solid var(--rule)}
+.card:nth-child(odd){border-right:.4pt solid var(--rule)}
+.card:nth-child(even){padding-left:4.6mm}
+.card .eyebrow{display:block;margin-bottom:2mm}
+.card .big{font-family:var(--sans);font-weight:300;font-size:21pt;line-height:1.05;letter-spacing:-.01em;color:var(--ink)}
+.card .big small{font-size:.5em;color:var(--muted);letter-spacing:.02em}
+.card p{font-size:9.6pt;margin:2mm 0 0;text-align:left;color:var(--ink-2)}
+
+.toc{list-style:none;margin:0;padding:0;counter-reset:toc}
+.toc li{display:grid;grid-template-columns:11mm 1fr auto;align-items:baseline;padding:1.45mm 0;border-bottom:.3pt solid var(--hair)}
+.toc .n{font-family:var(--display);font-size:15pt;color:var(--gold);font-weight:400}
+.toc .t{font-family:var(--display);font-size:13.4pt;font-weight:500}
+.toc .t small{display:block;font-family:var(--serif);font-style:italic;font-size:9pt;color:var(--muted);font-weight:400;margin-top:.4mm}
+.toc .tag{font-family:var(--sans);font-size:6.6pt;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+.sig{margin-top:8mm;font-family:var(--display);font-style:italic;font-size:12pt;color:var(--muted);text-align:right}
+.avoid{break-inside:avoid}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════ COVER ══════════════════════════════ -->
+<section class="cover">
+  <div class="glow"></div>
+  <svg class="rings" viewBox="0 0 200 200" aria-hidden="true">
+    <g fill="none" stroke="#C9A35A">
+      <circle cx="100" cy="100" r="96" stroke-opacity=".10" stroke-width=".25"/>
+      <circle cx="100" cy="100" r="80" stroke-opacity=".14" stroke-width=".25"/>
+      <circle cx="100" cy="100" r="64" stroke-opacity=".18" stroke-width=".25"/>
+      <circle cx="100" cy="100" r="48" stroke-opacity=".22" stroke-width=".25"/>
+      <circle cx="100" cy="100" r="32" stroke-opacity=".26" stroke-width=".25"/>
+      <rect x="97.6" y="88" width="4.8" height="24" stroke-opacity=".4" stroke-width=".3"/>
+      <line x1="96" y1="91" x2="104" y2="91" stroke-opacity=".4" stroke-width=".25"/>
+      <line x1="96" y1="109" x2="104" y2="109" stroke-opacity=".4" stroke-width=".25"/>
+      <line x1="100" y1="2" x2="100" y2="198" stroke-opacity=".10" stroke-width=".2"/>
+      <line x1="2" y1="100" x2="198" y2="100" stroke-opacity=".10" stroke-width=".2"/>
+    </g>
+  </svg>
+  <div class="frame"></div>
+  <div class="top">
+    <div class="mark"><div class="mono-mark">m</div>{{meta_institution}}</div>
+    <div>{{meta_event}} · 2026</div>
+  </div>
+  <div class="titleblock">
+    <div class="kicker">{{meta_problem}} &nbsp;—&nbsp; {{meta_dataset}}</div>
+    <h1>Runs, Roles<br>&amp; <em>Randomness</em></h1>
+    <div class="sub">A statistical inquiry into thirty cricketers: how runs are sampled, estimated and distributed, and whether a player’s role changes what we should expect.</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>{{n}}</b><span>Players observed</span></div>
+    <div class="stat"><b>3</b><span>Playing roles</span></div>
+    <div class="stat"><b>{{xbar}}</b><span>Mean runs</span></div>
+    <div class="stat"><b>{{eta2}}</b><span><i class="gk">η²</i> · role effect</span></div>
+  </div>
+  <div class="curve">{{cover_curve}}</div>
+  <div class="foot">
+    <div class="team">{{meta_team_block}}</div>
+    <div style="text-align:right">{{meta_date}}<br><span style="letter-spacing:.14em;opacity:.8">Unit 3 &amp; Unit 4 · Sampling · Estimation · CLT · ANOVA · <i class="gk">χ²</i></span></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ CONTENTS & SUMMARY ══════════════════════════════ -->
+<section>
+  <div class="eyebrow">Overview</div>
+  <h2 style="font-family:var(--display);font-weight:500;font-size:30pt;line-height:1.05;margin:2mm 0 4mm">The question, <em style="color:var(--gold)">in brief</em></h2>
+  <p class="lead">How many runs does a typical player in this sample score, how precisely can that be estimated, is a normal model reasonable for run output, and does mean run output differ between batters, all-rounders and bowlers?</p>
+
+  <div class="cards">
+    <div class="card"><span class="eyebrow">Task 2 · Estimation</span><div class="big">{{xbar}} <small>runs</small></div>
+      <p>Sample mean of Runs_Scored (s = {{s}}). The 95% t-interval is {{ci_lo}} to {{ci_hi}} runs, and the estimated MSE of <span class="bar">x</span> is {{mse_hat}} runs².</p></div>
+    <div class="card"><span class="eyebrow">Task 3 · Normal model</span><div class="big">p = {{sw_p}}</div>
+      <p>Shapiro–Wilk W = {{sw_W}}. The distribution is close to symmetric (skewness {{skew}}) and has no outliers. A normal model is plausible.</p></div>
+    <div class="card"><span class="eyebrow">Task 4 · One-way ANOVA</span><div class="big">F = {{F}} <small>(2, 27)</small></div>
+      <p>p = {{pF_sci}}. Mean runs differ by role, and role is associated with {{eta2_pct}}% of run variation (η² = {{eta2}}). This is a very large effect.</p></div>
+    <div class="card"><span class="eyebrow">Task 5 · Goodness-of-fit</span><div class="big">χ² = {{chi2}} <small>df = {{df5}}</small></div>
+      <p>p = {{p5}}. Counts in five equal-probability normal classes match expectation, which independently supports the Task 3 conclusion.</p></div>
+  </div>
+
+  <div class="two">
+    <div>
+      <h4 style="margin-top:0">Contents</h4>
+      <ol class="toc">
+        <li><span class="n">0</span><span class="t">Data inspection<small>Variables, quality checks, choice of outcome</small></span><span class="tag">§0</span></li>
+        <li><span class="n">1</span><span class="t">Sampling design<small>Unit, population, sample, design</small></span><span class="tag">Task 1</span></li>
+        <li><span class="n">2</span><span class="t">Point estimation &amp; MSE<small>Bias, variance, resampling</small></span><span class="tag">Task 2</span></li>
+        <li><span class="n">3</span><span class="t">Normality &amp; the CLT<small>Shape, Q–Q, sampling distributions</small></span><span class="tag">Task 3</span></li>
+        <li><span class="n">4</span><span class="t">One-way ANOVA<small>Runs by player role</small></span><span class="tag">Task 4</span></li>
+        <li><span class="n">5</span><span class="t">Chi-square goodness-of-fit<small>Normal classes · role mix</small></span><span class="tag">Task 5</span></li>
+        <li><span class="n">6</span><span class="t">Conclusions &amp; limitations<small>Significance vs importance</small></span><span class="tag">§6</span></li>
+      </ol>
+    </div>
+    <div>
+      <h4 style="margin-top:0">How to read this report</h4>
+      <p class="note">Every number, table and figure is produced by <span class="mono">analysis.py</span>, which runs from top to bottom with a fixed random seed ({{seed}}). Figures are numbered in the order the code creates them.</p>
+      <p class="note">Each inferential procedure is reported on a <strong>test card</strong>. The card gives the hypotheses, significance level, test statistic, degrees of freedom, p-value, decision and a conclusion in context.</p>
+      <p class="note">All tests use <span class="m">α</span> = 0.05. <em>Player_ID</em> is an identifier and is excluded from every calculation. No observation was added, removed or changed.</p>
+      <p class="note">The data are observational, so no result here is read as causal.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ §0 DATA ══════════════════════════════ -->
+<section class="page">
+  <div class="chapter"><div class="num">00</div><div><div class="eyebrow">Before the tasks</div><h2>Inspecting the <em>dataset</em></h2>
+    <div class="vars">File <b>Dataset_13.csv</b> · {{n}} rows × 7 columns · {{missing}} missing values · {{dups}} duplicate rows</div></div></div>
+
+  <p>As the brief requires, variables were chosen only after inspecting the file. It holds one identifier, five numerical measurements and one categorical variable, with no missing values, no duplicate rows and unique IDs.</p>
+
+  <table>
+    <caption><b>Table 0.1</b>Variable dictionary and role in this study</caption>
+    <thead><tr><th class="l">Variable</th><th class="l">Type</th><th class="l">Observed range / levels</th><th class="l">Use</th></tr></thead>
+    <tbody>
+      <tr><td>Player_ID</td><td class="l">Identifier</td><td class="l">PL01 – PL30</td><td class="l">Excluded from all calculations</td></tr>
+      <tr class="hl"><td>Runs_Scored</td><td class="l">Numerical · discrete count</td><td class="l">{{min_Runs_Scored}} – {{max_Runs_Scored}} runs</td><td class="l"><strong>Primary outcome, Tasks 1–5</strong></td></tr>
+      <tr class="hl"><td>Player_Role</td><td class="l">Categorical · nominal, 3 levels</td><td class="l">Batter · All-rounder · Bowler</td><td class="l"><strong>Grouping factor, Tasks 4–5</strong></td></tr>
+      <tr><td>Practice_Hours</td><td class="l">Numerical · continuous</td><td class="l">{{min_Practice_Hours}} – {{max_Practice_Hours}} hours</td><td class="l">Context only</td></tr>
+      <tr><td>Strike_Rate</td><td class="l">Numerical · continuous</td><td class="l">{{min_Strike_Rate}} – {{max_Strike_Rate}} runs / 100 balls</td><td class="l">Context only</td></tr>
+      <tr><td>Matches_Played</td><td class="l">Numerical · discrete count</td><td class="l">{{min_Matches_Played}} – {{max_Matches_Played}} matches</td><td class="l">Context only</td></tr>
+      <tr><td>Fitness_Score</td><td class="l">Numerical · score</td><td class="l">{{min_Fitness_Score}} – {{max_Fitness_Score}} (scale undocumented)</td><td class="l">Context only</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="k">0.1</span>Why Runs_Scored is the outcome</h3>
+  <p><em>Runs_Scored</em> is the most direct measure of output that applies to every role. It is complete (30 of 30 values), it varies a lot ({{min_Runs_Scored}} to {{max_Runs_Scored}}), and it can be summarised, estimated, modelled and grouped. That makes one variable usable for all five tasks, so the report follows one statistical question from start to finish. <em>Player_Role</em> is the only categorical variable and has exactly three independent levels, which is what one-way ANOVA needs.</p>
+  <div class="callout"><span class="eyebrow">Limitation · reference period</span>
+    <p>The period the counts cover (season, tournament or career) is not documented. Runs are almost uncorrelated with matches played (r = {{r_runs_matches}}), so they are unlikely to be career totals. We read <em>Runs_Scored</em> as runs recorded in the study’s reference period and do not convert it to a per-match rate.</p></div>
+
+  <figure>
+    <div class="svgwrap">{{fig:fig01_sample_overview}}</div>
+    <figcaption><b>Figure 1</b><span>Every player on every numerical variable, coloured by role, with black bars at the role means. Role separates Runs_Scored and Strike_Rate sharply, but separates Practice_Hours much less.</span></figcaption>
+  </figure>
+</section>
+
+<!-- ══════════════════════════════ TASK 1 ══════════════════════════════ -->
+<section class="page">
+  <div class="chapter"><div class="num">01</div><div><div class="eyebrow">Task 1</div><h2>Sampling design &amp; <em>population</em></h2>
+    <div class="vars">Variables · <b>Runs_Scored</b> (quantity of interest) · <b>Player_Role</b> (composition)</div></div></div>
+
+  <div class="two">
+    <div>
+      <h4 style="margin-top:0">Observational unit</h4>
+      <p>One individual cricket player. Each row is one player measured once on six attributes.</p>
+      <h4>Available sample</h4>
+      <p>n = {{n}} players labelled PL01–PL30. There are {{task1_bat}} batters, {{task1_ar}} all-rounders and {{task1_bowl}} bowlers, with no missing or duplicated records.</p>
+    </div>
+    <div>
+      <h4 style="margin-top:0">Target population</h4>
+      <p>No documentation comes with the data, so the population cannot be named exactly. The most defensible target is <em>players of the competition or squad system these 30 records were drawn from</em>, which, judging by the strike rates, is a limited-overs setting. We do not know the league, season or country, and we treat this as a limitation.</p>
+    </div>
+  </div>
+
+  <h3><span class="k">1.1</span>The documented sampling process</h3>
+  <p>The sampling process is <strong>not documented</strong>. The file has no sampling frame, selection rule, inclusion probabilities, time window or response information. Following the instructions, we therefore do <em>not</em> assume the sample is random or representative.</p>
+  <table style="margin-top:1mm">
+    <caption><b>Table 1.1</b>Probability versus non-probability sampling</caption>
+    <thead><tr><th class="l" style="width:24%">Family</th><th class="l">Defining feature</th><th class="l">Examples</th><th class="l" style="width:26%">Supports inference?</th></tr></thead>
+    <tbody>
+      <tr><td>Probability</td><td class="l">Every unit in the frame has a known, non-zero chance of selection, and selection is random.</td><td class="l">Simple random, stratified, cluster, systematic</td><td class="l">Yes. Sampling error can be quantified.</td></tr>
+      <tr><td>Non-probability</td><td class="l">Units are chosen by convenience, judgement or quota. Selection chances are unknown.</td><td class="l">Convenience, quota, purposive, volunteer</td><td class="l">Only under extra assumptions. Selection bias is possible.</td></tr>
+    </tbody>
+  </table>
+  <p>One feature of the data is informative. The roles are <strong>perfectly balanced at 10 / 10 / 10</strong>. Under simple random sampling from a population with equal role shares, the probability of an exact 10/10/10 split is only <span class="nw">{{p_balance}}</span> (about {{p_balance_pct}}%, from the multinomial distribution). Real squads also rarely have equal role shares. Exact balance therefore points to a <em>designed</em> selection with a fixed number of players per role. That could be <strong>quota sampling</strong> (non-probability) or <strong>stratified sampling with equal allocation</strong> (probability), and only documented randomisation within each role would separate the two. With no such documentation we classify the sample as <strong>non-probability (quota-like)</strong>. The sequential IDs also suggest a list extract rather than a random draw.</p>
+
+  <h3><span class="k">1.2</span>Variable and population quantity of interest</h3>
+  <p>The chosen variable is <em>Runs_Scored</em>. The main population quantity is the <strong>population mean</strong></p>
+  <div class="eq">μ = E[Runs_Scored] &nbsp;for the target population of players<span class="lbl">Parameter</span></div>
+  <p>This is the expected run output of a randomly chosen player. We estimate it with the sample mean <span class="bar">x</span> (Task 2). Two related quantities appear later: the role-specific means <span class="m">μ</span><sub>Bat</sub>, <span class="m">μ</span><sub>AR</sub> and <span class="m">μ</span><sub>Bowl</sub> (Task 4), and the population role shares (Task 5). Because role is strongly related to runs (η² = {{eta2}} in Task 4), μ is a <em>weighted average</em> of the role means, <span class="m">μ = Σ w<sub>r</sub> μ<sub>r</sub></span>, with weights equal to the population role shares. The sample fixes every weight at 1/3, so <span class="bar">x</span> estimates μ without bias only if the population really has equal role shares.</p>
+
+  <div class="reflections">
+    <span class="eyebrow">Reflection questions</span>
+    <div class="qa"><div class="qn">1</div><div><div class="q">How could the sampling process affect representativeness?</div>
+      <p><strong>Role mix.</strong> A fixed 10/10/10 quota forces equal role weights. If the real population has, say, more bowlers than batters, the sample over-represents high scorers and <span class="bar">x</span> overstates μ. If it has fewer, <span class="bar">x</span> understates μ. Role explains about {{eta2_pct}}% of run variation, so this is the largest single threat. Role means range from {{bowl_mean}} to {{bat_mean}} runs, so the role weights matter a great deal.</p>
+      <p><strong>Selection bias within roles.</strong> If an analyst or coach chose regular or high-profile players, the sample may favour players with more opportunities and better form. A bigger sample would not remove this, because it is a <em>bias</em>, not random error.</p>
+      <p><strong>Coverage and time.</strong> Players without records (injured, newly registered, rarely selected) cannot appear. The undocumented reference period may also mix seasons. Finally, n = 30 means that even a well-designed sample has a standard error of about {{se}} runs for the mean.</p></div></div>
+    <div class="qa"><div class="qn">2</div><div><div class="q">What sampling design could improve coverage of the target population?</div>
+      <p>Start from a <strong>complete sampling frame</strong>, such as the official registration list for the competition and season. Then use <strong>stratified random sampling by role</strong>: draw players at random within each role stratum, and set the stratum sizes in proportion to the population role shares (proportional allocation). Alternatively, use <strong>Neyman allocation</strong>, which assigns more players to more variable strata. The batter SD ({{bat_sd}}) is larger than the all-rounder SD ({{ar_sd}}), so batters would get more places. If the role shares are not proportional in the sample, apply design weights. Teams form natural clusters, so a <strong>two-stage design</strong> (random teams, then random players within teams) would be cheaper, at some cost in precision. In every case, document the frame, the selection probabilities and a common reference period for <em>Runs_Scored</em>, and increase n where possible.</p></div></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ TASK 2 ══════════════════════════════ -->
+<section class="page">
+  <div class="chapter"><div class="num">02</div><div><div class="eyebrow">Task 2</div><h2>Point estimation &amp; <em>mean squared error</em></h2>
+    <div class="vars">Variable · <b>Runs_Scored</b> (numerical, n = {{n}})</div></div></div>
+
+  <h3><span class="k">2.1</span>Sample estimates</h3>
+  <table>
+    <caption><b>Table 2.1</b>Point estimates for Runs_Scored</caption>
+    <thead><tr><th class="l">Quantity</th><th class="l">Estimator</th><th>Estimate</th><th class="l">Units</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td>Population mean μ</td><td class="l">Sample mean &nbsp;<span class="bar">x</span> = Σx<sub>i</sub> / n</td><td><strong>{{xbar}}</strong></td><td class="l">runs</td></tr>
+      <tr class="hl"><td>Population variance σ²</td><td class="l">Sample variance &nbsp;s² = Σ(x<sub>i</sub> − <span class="bar">x</span>)² / (n − 1)</td><td><strong>{{s2}}</strong></td><td class="l">runs²</td></tr>
+      <tr><td>Population SD σ</td><td class="l">s = √s²</td><td>{{s}}</td><td class="l">runs</td></tr>
+      <tr><td>Population variance σ² (alternative)</td><td class="l">Plug-in &nbsp;<span class="hat">σ</span>² = Σ(x<sub>i</sub> − <span class="bar">x</span>)² / n</td><td>{{s2n}}</td><td class="l">runs²</td></tr>
+      <tr><td>Standard error of <span class="bar">x</span></td><td class="l">SE = s / √n</td><td>{{se}}</td><td class="l">runs</td></tr>
+      <tr><td>MSE of <span class="bar">x</span></td><td class="l">s² / n</td><td>{{mse_hat}}</td><td class="l">runs²</td></tr>
+      <tr><td>95% confidence interval for μ</td><td class="l"><span class="bar">x</span> ± t<sub>0.975, 29</sub> · SE &nbsp;(t* = {{tcrit}})</td><td>{{ci_lo}} – {{ci_hi}}</td><td class="l">runs</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="k">2.2</span>Point estimation, bias, variance and MSE</h3>
+  <p>A <strong>point estimator</strong> <span class="m"><span class="hat">θ</span></span> is a rule that turns a sample into a single best guess of a population parameter <span class="m">θ</span>. Its value for our data is the <em>estimate</em>. The estimator is a random variable, because a different sample would give a different value, so we judge it by how its sampling distribution sits around <span class="m">θ</span>:</p>
+  <div class="eq">Bias(<span class="hat">θ</span>) = E[<span class="hat">θ</span>] − θ &nbsp;&nbsp;·&nbsp;&nbsp; Var(<span class="hat">θ</span>) = E[(<span class="hat">θ</span> − E[<span class="hat">θ</span>])²] &nbsp;&nbsp;·&nbsp;&nbsp; MSE(<span class="hat">θ</span>) = E[(<span class="hat">θ</span> − θ)²] = Var(<span class="hat">θ</span>) + Bias(<span class="hat">θ</span>)²</div>
+  <p>Bias is <em>systematic</em> error, meaning the estimator is off target on average. Variance is <em>random</em> error, meaning how much the estimates spread out. MSE measures total accuracy around the true value. Under independent sampling the theory is exact: <span class="m">E[<span class="bar">x</span>] = μ</span>, so <span class="bar">x</span> is unbiased, and <span class="m">Var(<span class="bar">x</span>) = σ²/n</span>, so <span class="m">MSE(<span class="bar">x</span>) = σ²/n</span>. Our estimate of this is {{mse_hat}} runs², an RMSE of {{se}} runs. Likewise <span class="m">E[s²] = σ²</span>, so s² is unbiased, while the plug-in <span class="m"><span class="hat">σ</span>² = (n−1)s²/n</span> has bias <span class="m">−σ²/n</span>.</p>
+
+  <h3><span class="k">2.3</span>Resampling illustration</h3>
+  <p>To <em>see</em> bias, variance and MSE, we need a population whose parameters are known. We treat the 30 observed values as a <strong>pseudo-population</strong>, the empirical distribution, with known mean <span class="m">μ*</span> = {{xbar}}, variance <span class="m">σ*²</span> = {{sig2_star}} (divisor n), median {{med_star}} and excess kurtosis {{kurt_star}}. From it we drew B = {{B}} samples with replacement at each size n ∈ {3, 5, 10, 15, 20, 30, 50, 100} and applied four estimators to every sample. Exact theoretical values for the pseudo-population are shown for comparison.</p>
+
+  <figure>
+    <div class="svgwrap">{{fig:fig02_sampling_distribution_mse}}</div>
+    <figcaption><b>Figure 2</b><span>(A) The sampling distribution of <span class="bar">x</span> stays centred on μ* and narrows as n grows. Its SD is {{sdmean_5}}, {{sdmean_10}} and {{sdmean_30}} runs at n = 5, 10 and 30, against theoretical σ*/√n values of {{sdmean_5_th}}, {{sdmean_10_th}} and {{sdmean_30_th}}. (B) On log–log axes the MSE of the mean follows σ²/n, a straight line of slope −1. The median is always less accurate.</span></figcaption>
+  </figure>
+
+  <table>
+    <caption><b>Table 2.2</b>Estimators of the centre (target μ* = {{xbar}}) · runs²</caption>
+    <thead><tr><th class="l">Estimator</th><th>n</th><th>Bias</th><th>Variance</th><th>MSE (simulated)</th><th>MSE (theory)</th></tr></thead>
+    <tbody>
+      <tr><td>Sample mean</td><td>5</td><td>{{t2_mean_5_bias}}</td><td>{{t2_mean_5_var}}</td><td>{{t2_mean_5_mse}}</td><td>{{t2_mean_5_th}}</td></tr>
+      <tr><td>Sample mean</td><td>10</td><td>{{t2_mean_10_bias}}</td><td>{{t2_mean_10_var}}</td><td>{{t2_mean_10_mse}}</td><td>{{t2_mean_10_th}}</td></tr>
+      <tr class="hl"><td>Sample mean</td><td>30</td><td>{{t2_mean_30_bias}}</td><td>{{t2_mean_30_var}}</td><td><strong>{{t2_mean_30_mse}}</strong></td><td>{{t2_mean_30_th}}</td></tr>
+      <tr><td>Sample median</td><td>5</td><td>{{t2_median_5_bias}}</td><td>{{t2_median_5_var}}</td><td>{{t2_median_5_mse}}</td><td>—</td></tr>
+      <tr><td>Sample median</td><td>10</td><td>{{t2_median_10_bias}}</td><td>{{t2_median_10_var}}</td><td>{{t2_median_10_mse}}</td><td>—</td></tr>
+      <tr><td>Sample median</td><td>30</td><td>{{t2_median_30_bias}}</td><td>{{t2_median_30_var}}</td><td>{{t2_median_30_mse}}</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <p>The simulation matches theory. The mean’s bias is essentially zero and its MSE tracks σ*²/n (for example {{t2_mean_30_mse}} simulated against {{t2_mean_30_th}} theoretical at n = 30). The <strong>median</strong> estimates the same centre with an MSE {{eff_median}} times larger at n = 30, so it is clearly less efficient here. It is also slightly biased for μ*, because the pseudo-population is not perfectly symmetric (its median of {{med_star}} differs from its mean).</p>
+
+  <figure>
+    <div class="svgwrap">{{fig:fig03_variance_estimator_mse}}</div>
+    <figcaption><b>Figure 3</b><span>MSE = variance + bias² for the two variance estimators. The biased plug-in <span class="hat">σ</span>² (divisor n) carries a visible bias² layer, but its variance is smaller by more than that, so its total MSE is lower. The gap closes as n grows.</span></figcaption>
+  </figure>
+
+  <table>
+    <caption><b>Table 2.3</b>Estimators of the variance (target σ*² = {{sig2_star}}) · bias in runs², variance and MSE in millions of runs⁴</caption>
+    <thead><tr><th class="l">Estimator</th><th>n</th><th>Bias</th><th>Variance</th><th>MSE (simulated)</th><th>MSE (theory)</th></tr></thead>
+    <tbody>
+      <tr><td>s² (divisor n − 1)</td><td>5</td><td>{{t2_S2_5_bias}}</td><td>{{t2_S2_5_var}}</td><td>{{t2_S2_5_mse}}</td><td>{{t2_S2_5_th}}</td></tr>
+      <tr class="hl"><td><span class="hat">σ</span>² (divisor n)</td><td>5</td><td>{{t2_S2n_5_bias}}</td><td>{{t2_S2n_5_var}}</td><td><strong>{{t2_S2n_5_mse}}</strong></td><td>{{t2_S2n_5_th}}</td></tr>
+      <tr><td>s² (divisor n − 1)</td><td>10</td><td>{{t2_S2_10_bias}}</td><td>{{t2_S2_10_var}}</td><td>{{t2_S2_10_mse}}</td><td>{{t2_S2_10_th}}</td></tr>
+      <tr class="hl"><td><span class="hat">σ</span>² (divisor n)</td><td>10</td><td>{{t2_S2n_10_bias}}</td><td>{{t2_S2n_10_var}}</td><td><strong>{{t2_S2n_10_mse}}</strong></td><td>{{t2_S2n_10_th}}</td></tr>
+      <tr><td>s² (divisor n − 1)</td><td>30</td><td>{{t2_S2_30_bias}}</td><td>{{t2_S2_30_var}}</td><td>{{t2_S2_30_mse}}</td><td>{{t2_S2_30_th}}</td></tr>
+      <tr class="hl"><td><span class="hat">σ</span>² (divisor n)</td><td>30</td><td>{{t2_S2n_30_bias}}</td><td>{{t2_S2n_30_var}}</td><td><strong>{{t2_S2n_30_mse}}</strong></td><td>{{t2_S2n_30_th}}</td></tr>
+    </tbody>
+  </table>
+  <p>The bias of <span class="hat">σ</span>² matches theory, which predicts <span class="m">−σ*²/n</span> = {{S2n_5_bias_th}} at n = 5 and {{S2n_30_bias_th}} at n = 30. The small non-zero biases shown for s² are Monte Carlo noise. The key lesson is that <strong>being unbiased does not mean having the lowest MSE</strong>. Here <span class="hat">σ</span>² beats s² on MSE at every sample size tested, because shrinking the estimate removes more variance than it adds in bias². How large this advantage is depends on the population’s tail shape. This pseudo-population is light-tailed (excess kurtosis {{kurt_star}}).</p>
+
+  <div class="reflections">
+    <span class="eyebrow">Reflection questions</span>
+    <div class="qa"><div class="qn">1</div><div><div class="q">What does MSE capture beyond estimator variance?</div>
+      <p>MSE adds <strong>bias²</strong>, the squared systematic error. Variance measures spread around the estimator’s <em>own</em> average. MSE measures spread around the <em>true parameter</em>. An estimator can be very precise yet consistently wrong, and only MSE would show that. Because it combines both errors on one scale, MSE also lets us compare biased and unbiased estimators fairly. That is how Table 2.3 shows the biased <span class="hat">σ</span>² ({{t2_S2n_5_mse}} million runs⁴ at n = 5) beating the unbiased s² ({{t2_S2_5_mse}} million). One caution: the resampling MSE covers only sampling error under random sampling from the pseudo-population. Bias from the non-random selection described in Task 1 would add to the true MSE, and it cannot be estimated from these data.</p></div></div>
+    <div class="qa"><div class="qn">2</div><div><div class="q">How can sample size affect the precision and MSE of an estimator?</div>
+      <p>For the mean, <span class="m">Var(<span class="bar">x</span>) = σ²/n</span>, so precision grows in proportion to n and the standard error shrinks like 1/√n. In Figure 2B the MSE falls from {{t2_mean_5_mse}} runs² at n = 5 to {{t2_mean_30_mse}} at n = 30. Halving the standard error needs four times as many players, so returns diminish. The bias of <span class="hat">σ</span>² (<span class="m">−σ²/n</span>) also vanishes as n grows, so both variance estimators are <em>consistent</em> and their MSEs meet at large n ({{t2_S2_30_mse}} against {{t2_S2n_30_mse}} million at n = 30). A larger sample does <strong>not</strong> fix design bias, though. A larger quota or convenience sample gives a more precise estimate of the wrong quantity.</p></div></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ TASK 3 ══════════════════════════════ -->
+<section class="page">
+  <div class="chapter"><div class="num">03</div><div><div class="eyebrow">Task 3</div><h2>The normal model &amp; the <em>Central Limit Theorem</em></h2>
+    <div class="vars">Variable · <b>Runs_Scored</b> · and a derived indicator <b>I(Runs ≥ 300)</b> for the CLT illustration</div></div></div>
+
+  <h3><span class="k">3.1</span>Summary of Runs_Scored</h3>
+  <table>
+    <caption><b>Table 3.1</b>Numerical summary · Runs_Scored (n = {{n}})</caption>
+    <thead><tr><th class="l">Mean</th><th>Median</th><th>SD</th><th>Min</th><th>Q1</th><th>Q3</th><th>IQR</th><th>Max</th><th>Skewness</th><th>Excess kurtosis</th><th>CV</th></tr></thead>
+    <tbody><tr><td>{{xbar}}</td><td>{{median}}</td><td>{{s}}</td><td>{{min}}</td><td>{{q1}}</td><td>{{q3}}</td><td>{{iqr}}</td><td>{{max}}</td><td>{{skew}}</td><td>{{kurt}}</td><td>{{cv}}%</td></tr></tbody>
+  </table>
+  <p>The mean ({{xbar}}) and median ({{median}}) are close, and the skewness of {{skew}} is near zero, so the distribution is close to symmetric. The excess kurtosis of {{kurt}} means slightly lighter tails than a normal curve. Tukey’s fences [{{fence_lo}}, {{fence_hi}}] flag {{n_outliers}} outliers. The empirical rule also holds well. {{w1}}% of players lie within one SD of the mean (normal: 68.3%), {{w2}}% within two SD (95.4%) and {{w3}}% within three SD (99.7%).</p>
+
+  <figure>
+    <div class="svgwrap">{{fig:fig04_runs_normality}}</div>
+    <figcaption><b>Figure 4</b><span>(A) Histogram of the 30 observations with the fitted normal curve. (B) Normal Q–Q plot of the standardised runs. All points lie inside the 95% simulation envelope ({{outside_env}} outside), and the Q–Q correlation is {{qq_r}}.</span></figcaption>
+  </figure>
+
+  <div class="test">
+    <div class="th"><b>Shapiro–Wilk test of normality</b><span>Inferential procedure · Task 3</span></div>
+    <dl>
+      <dt>Hypotheses</dt><dd>H<sub>0</sub>: Runs_Scored in the population follows a normal distribution. &nbsp;H<sub>1</sub>: it does not.</dd>
+      <dt>Level</dt><dd><span class="num">α = 0.05</span></dd>
+      <dt>Statistic</dt><dd><span class="num">W = {{sw_W}}</span> &nbsp;(n = {{n}}; the W statistic has no degrees of freedom)</dd>
+      <dt>p-value</dt><dd><span class="num">p = {{sw_p}}</span></dd>
+      <dt>Decision</dt><dd class="decision"><span class="chip keep">Fail to reject H₀</span> p &gt; 0.05</dd>
+      <dt>Conclusion</dt><dd>There is no evidence against a normal model for individual run totals, so a normal model is plausible. Failing to reject is not proof of normality. With n = 30 the test has limited power to detect mild departures.</dd>
+    </dl>
+  </div>
+
+  <h3><span class="k">3.2</span>Observations versus the sampling distribution of the mean</h3>
+  <p>The <strong>distribution of observations</strong> describes how individual players differ. It is centred at μ with spread σ (estimated as {{s}} runs), and its shape is whatever shape the data have. The <strong>sampling distribution of <span class="bar">x</span></strong> describes how the <em>average of n players</em> would vary across repeated samples. It has the same centre μ, but its spread is only <span class="m">σ/√n</span> (about {{se}} runs at n = 30), and its shape tends towards normal as n grows. The first describes players. The second describes our estimate of the mean, and it is what confidence intervals and tests rely on.</p>
+
+  <h3><span class="k">3.3</span>The Central Limit Theorem, illustrated</h3>
+  <p><strong>Statement.</strong> If <span class="m">X<sub>1</sub>, …, X<sub>n</sub></span> are independent and identically distributed with mean μ and finite variance σ², then <span class="m">(<span class="bar">x</span> − μ)/(σ/√n)</span> approaches N(0, 1) as n → ∞. <strong>Conditions:</strong> (i) independent observations, for example from random sampling, with n no more than about 10% of a finite population when sampling without replacement; (ii) a common distribution; (iii) finite variance; (iv) n large enough for the parent’s skewness. A rule of thumb is n ≥ 30 for moderate skew, more for strong skew, and <span class="m">np ≥ 10</span> and <span class="m">n(1−p) ≥ 10</span> for proportions.</p>
+  <p>We resampled B = {{B}} samples with replacement from two parents built from the data. The first is <em>Runs_Scored</em> itself. The second is a deliberately skewed indicator of a <em>high-output player</em>, I(Runs ≥ 300). {{high_n}} of 30 players qualify, so this parent is Bernoulli with p = {{high_p}} and skewness {{gamma_high}}. Its sample mean is the proportion of high-output players.</p>
+
+  <figure>
+    <div class="svgwrap">{{fig:fig05_clt_resampling}}</div>
+    <figcaption><b>Figure 5</b><span>The CLT at work. Row 1: means of Runs_Scored are normal already at n = 5. Row 2: the skewed 0/1 parent gives clearly skewed means at n = 5, and a nearly normal shape (skewness {{clt_h_30_sk}}) only by n = 30. Black curves are the normal distributions N(μ, σ²/n) that the CLT predicts.</span></figcaption>
+  </figure>
+
+  <table>
+    <caption><b>Table 3.2</b>Resampled sampling distributions of the mean (B = {{B}})</caption>
+    <thead><tr><th class="l">Parent</th><th>n</th><th>SD of means</th><th>Theory σ/√n</th><th>Skewness</th><th>Theory γ/√n</th><th>Excess kurtosis</th></tr></thead>
+    <tbody>
+      <tr><td>Runs_Scored</td><td>1</td><td>{{clt_r_1_sd}}</td><td>{{clt_r_1_th}}</td><td>{{clt_r_1_sk}}</td><td>{{clt_r_1_skth}}</td><td>{{clt_r_1_ku}}</td></tr>
+      <tr><td>Runs_Scored</td><td>5</td><td>{{clt_r_5_sd}}</td><td>{{clt_r_5_th}}</td><td>{{clt_r_5_sk}}</td><td>{{clt_r_5_skth}}</td><td>{{clt_r_5_ku}}</td></tr>
+      <tr class="hl"><td>Runs_Scored</td><td>30</td><td>{{clt_r_30_sd}}</td><td>{{clt_r_30_th}}</td><td>{{clt_r_30_sk}}</td><td>{{clt_r_30_skth}}</td><td>{{clt_r_30_ku}}</td></tr>
+      <tr><td>I(Runs ≥ 300)</td><td>1</td><td>{{clt_h_1_sd}}</td><td>{{clt_h_1_th}}</td><td>{{clt_h_1_sk}}</td><td>{{clt_h_1_skth}}</td><td>{{clt_h_1_ku}}</td></tr>
+      <tr><td>I(Runs ≥ 300)</td><td>5</td><td>{{clt_h_5_sd}}</td><td>{{clt_h_5_th}}</td><td>{{clt_h_5_sk}}</td><td>{{clt_h_5_skth}}</td><td>{{clt_h_5_ku}}</td></tr>
+      <tr><td>I(Runs ≥ 300)</td><td>10</td><td>{{clt_h_10_sd}}</td><td>{{clt_h_10_th}}</td><td>{{clt_h_10_sk}}</td><td>{{clt_h_10_skth}}</td><td>{{clt_h_10_ku}}</td></tr>
+      <tr class="hl"><td>I(Runs ≥ 300)</td><td>30</td><td>{{clt_h_30_sd}}</td><td>{{clt_h_30_th}}</td><td>{{clt_h_30_sk}}</td><td>{{clt_h_30_skth}}</td><td>{{clt_h_30_ku}}</td></tr>
+      <tr><td>I(Runs ≥ 300)</td><td>50</td><td>{{clt_h_50_sd}}</td><td>{{clt_h_50_th}}</td><td>{{clt_h_50_sk}}</td><td>{{clt_h_50_skth}}</td><td>{{clt_h_50_ku}}</td></tr>
+    </tbody>
+  </table>
+  <p>In every row the spread of the means matches <span class="m">σ/√n</span>, and the skewness decays like <span class="m">γ/√n</span>. For the Bernoulli parent at n = 30, <span class="m">np</span> = {{clt_h_np30}}, which is below 10. That explains why a little skewness ({{clt_h_30_sk}}) remains, and it shows that “n ≥ 30” is a guideline, not a guarantee.</p>
+
+  <div class="reflections">
+    <span class="eyebrow">Reflection questions</span>
+    <div class="qa"><div class="qn">1</div><div><div class="q">Which features support or weaken a normal-model assumption?</div>
+      <p><strong>Support:</strong> mean ≈ median; skewness {{skew}}; no outliers; a straight Q–Q plot inside the envelope (r = {{qq_r}}); empirical-rule shares of {{w1}}% / {{w2}}% / {{w3}}%; Shapiro–Wilk p = {{sw_p}}; and the χ² goodness-of-fit result in Task 5 (p = {{p5}}).</p>
+      <p><strong>Weaken:</strong> (i) runs are <em>discrete counts bounded below by zero</em>, while the normal model is continuous and unbounded. The fitted model gives a negative total a probability of only {{p_negative}}, so this matters little in practice. (ii) The excess kurtosis of {{kurt}} and an empty bin around 125–150 runs suggest a flatter shape. (iii) Most importantly, the data mix three role groups with very different means (Task 4). The pooled distribution looks normal partly because the three groups are evenly spaced. A single normal curve describes the data well but does not reflect how they arise. (iv) With n = 30, tests of normality have little power.</p></div></div>
+    <div class="qa"><div class="qn">2</div><div><div class="q">Why can sample means be approximately normal when individual observations are not?</div>
+      <p>A mean is a <em>sum</em> of many independent contributions divided by n. Unusual values in opposite directions cancel. The spread shrinks like 1/√n, and the shape distortions shrink faster: skewness falls like <span class="m">γ/√n</span> and excess kurtosis like <span class="m">κ/n</span>. Table 3.2 shows this directly. The 0/1 parent, which is as far from normal as a variable can be (two spikes, skewness {{gamma_high}}), produces means with skewness {{clt_h_5_sk}} at n = 5 and {{clt_h_30_sk}} at n = 30, close to the theoretical {{skth_h_30}}. This is the Central Limit Theorem. It needs independence and finite variance, not normal data, and the more skewed the parent, the larger n must be.</p></div></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ TASK 4 ══════════════════════════════ -->
+<section class="page">
+  <div class="chapter"><div class="num">04</div><div><div class="eyebrow">Task 4</div><h2>One-way ANOVA: <em>runs by role</em></h2>
+    <div class="vars">Outcome · <b>Runs_Scored</b> (numerical) &nbsp;·&nbsp; Factor · <b>Player_Role</b> (3 independent groups, n = 10 each)</div></div></div>
+
+  <p class="lead" style="font-size:13.2pt">Does mean run output differ between Batters, All-rounders and Bowlers in the population these players represent?</p>
+  <p>The dataset has one categorical variable with three or more levels: <em>Player_Role</em>. Its groups are <strong>independent</strong>, because each player has exactly one role and appears once. The design is <strong>balanced</strong> at 10 players per role. The outcome is the numerical <em>Runs_Scored</em>.</p>
+
+  <table>
+    <caption><b>Table 4.1</b>Group summaries · Runs_Scored by Player_Role</caption>
+    <thead><tr><th class="l">Role</th><th>n</th><th>Mean</th><th>SD</th><th>SE</th><th>Median</th><th>Min</th><th>Max</th><th>Shapiro W</th><th>Shapiro p</th></tr></thead>
+    <tbody>
+      <tr><td><span class="sw" style="background:var(--bat)"></span>Batter</td><td>10</td><td>{{bat_mean}}</td><td>{{bat_sd}}</td><td>{{bat_se}}</td><td>{{bat_med}}</td><td>{{bat_min}}</td><td>{{bat_max}}</td><td>{{bat_swW}}</td><td>{{bat_swp}}</td></tr>
+      <tr><td><span class="sw" style="background:var(--ar)"></span>All-rounder</td><td>10</td><td>{{ar_mean}}</td><td>{{ar_sd}}</td><td>{{ar_se}}</td><td>{{ar_med}}</td><td>{{ar_min}}</td><td>{{ar_max}}</td><td>{{ar_swW}}</td><td>{{ar_swp}}</td></tr>
+      <tr><td><span class="sw" style="background:var(--bowl)"></span>Bowler</td><td>10</td><td>{{bowl_mean}}</td><td>{{bowl_sd}}</td><td>{{bowl_se}}</td><td>{{bowl_med}}</td><td>{{bowl_min}}</td><td>{{bowl_max}}</td><td>{{bowl_swW}}</td><td>{{bowl_swp}}</td></tr>
+      <tr class="total"><td>All players</td><td>{{n}}</td><td>{{grand}}</td><td>{{s}}</td><td>{{se}}</td><td>{{median}}</td><td>{{min}}</td><td>{{max}}</td><td>{{sw_W}}</td><td>{{sw_p}}</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <div class="svgwrap">{{fig:fig06_anova_groups}}</div>
+    <figcaption><b>Figure 6</b><span>(A) Individual players (dots), interquartile boxes and group means (black bars) against the grand mean. (B) The pooled residuals (each value minus its role mean), scaled by √MSW, lie close to the normal line.</span></figcaption>
+  </figure>
+
+  <h3><span class="k">4.1</span>Checking the assumptions</h3>
+  <ul class="clean">
+    <li><strong>Independence.</strong> Each player is counted once and belongs to one role, so the groups are independent by construction. Independence <em>between</em> players cannot be verified, because the sampling is undocumented (Task 1). Teammates exposed to the same conditions could be mildly dependent.</li>
+    <li><strong>Normality within groups.</strong> Shapiro–Wilk tests give p = {{bat_swp}}, {{ar_swp}} and {{bowl_swp}} (H<sub>0</sub>: the role’s runs are normal), and the pooled residuals give W = {{swres_W}}, p = {{swres_p}}. None of these provide evidence against normality. With 10 per group these checks have little power, but the balanced design makes the F test robust to moderate non-normality.</li>
+    <li><strong>Equal variances.</strong> The largest-to-smallest SD ratio is {{sd_ratio}}, below the usual limit of 2. Levene’s test is reported below.</li>
+  </ul>
+
+  <div class="test">
+    <div class="th"><b>Levene’s test (Brown–Forsythe, median-centred)</b><span>Assumption check · Task 4</span></div>
+    <dl>
+      <dt>Hypotheses</dt><dd>H<sub>0</sub>: σ²<sub>Bat</sub> = σ²<sub>AR</sub> = σ²<sub>Bowl</sub>. &nbsp;H<sub>1</sub>: at least one population variance differs.</dd>
+      <dt>Level</dt><dd><span class="num">α = 0.05</span></dd>
+      <dt>Statistic · df</dt><dd><span class="num">W = {{lev_W}}</span> &nbsp;on <span class="num">df = ({{dfb}}, {{dfw}})</span></dd>
+      <dt>p-value</dt><dd><span class="num">p = {{lev_p}}</span></dd>
+      <dt>Decision</dt><dd class="decision"><span class="chip keep">Fail to reject H₀</span> p &gt; 0.05</dd>
+      <dt>Conclusion</dt><dd>There is no evidence that the spread of runs differs by role, so the pooled-variance (classical) ANOVA is appropriate and Welch’s adjustment is not needed.</dd>
+    </dl>
+  </div>
+
+  <h3><span class="k">4.2</span>The ANOVA</h3>
+  <table>
+    <caption><b>Table 4.2</b>One-way ANOVA table · Runs_Scored ~ Player_Role</caption>
+    <thead><tr><th class="l">Source</th><th>Sum of squares</th><th>df</th><th>Mean square</th><th>F</th><th>p-value</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td>Between roles</td><td>{{SSB}}</td><td>{{dfb}}</td><td>{{MSB}}</td><td><strong>{{F}}</strong></td><td><strong>{{pF_sci}}</strong></td></tr>
+      <tr><td>Within roles (error)</td><td>{{SSW}}</td><td>{{dfw}}</td><td>{{MSW}}</td><td></td><td></td></tr>
+      <tr class="total"><td>Total</td><td>{{SST}}</td><td>{{dft}}</td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+
+  <div class="test">
+    <div class="th"><b>One-way ANOVA F test</b><span>Inferential procedure · Task 4</span></div>
+    <dl>
+      <dt>Hypotheses</dt><dd>H<sub>0</sub>: μ<sub>Bat</sub> = μ<sub>AR</sub> = μ<sub>Bowl</sub> (mean runs are equal for all roles). &nbsp;H<sub>1</sub>: at least one role’s population mean differs.</dd>
+      <dt>Level</dt><dd><span class="num">α = 0.05</span> &nbsp;(critical value F<sub>0.05; 2, 27</sub> = {{Fcrit}})</dd>
+      <dt>Statistic · df</dt><dd><span class="num">F = MSB / MSW = {{MSB}} / {{MSW}} = {{F4}}</span> &nbsp;on <span class="num">df = ({{dfb}}, {{dfw}})</span></dd>
+      <dt>p-value</dt><dd><span class="num">p = {{pF_sci}}</span> &nbsp;(p {{pF}})</dd>
+      <dt>Decision</dt><dd class="decision"><span class="chip rej">Reject H₀</span> F = {{F}} &gt; {{Fcrit}} and p &lt; 0.05</dd>
+      <dt>Conclusion</dt><dd>There is very strong evidence that mean runs scored are <em>not</em> the same for all three roles in the population these players represent. This test does not say which roles differ. As instructed, no post-hoc comparisons were made.</dd>
+    </dl>
+  </div>
+
+  <figure>
+    <div class="svgwrap">{{fig:fig07_f_distribution}}</div>
+    <figcaption><b>Figure 7</b><span>The observed F of {{F}} lies far beyond the 5% critical value of {{Fcrit}} on the F(2, 27) reference distribution. The tail area beyond it, which is the p-value, is too small to see.</span></figcaption>
+  </figure>
+
+  <div class="callout"><span class="eyebrow">Statistical significance versus practical importance</span>
+    <p>The p-value shows the role differences are very unlikely to be due to chance. The <strong>effect size</strong> shows they are also large. η² = SSB/SST = {{eta2}}, so {{eta2_pct}}% of the variation in runs is associated with role. The less biased ω² is {{omega2}}, and Cohen’s f = {{cohen_f}} (0.40 already counts as “large”). Descriptively, the role means span {{mean_range}} runs, about {{range_in_sd}} pooled SDs (pooled SD = {{pooled_sd}}). A gap of this size matters for selection and planning. It is observational, though. Roles are not randomly assigned, batters are picked for batting and usually bat higher in the order, so role reflects both <em>skill</em> and <em>opportunity</em>. We do not claim that changing a player’s role would change their runs.</p></div>
+
+  <div class="reflections">
+    <span class="eyebrow">Reflection questions</span>
+    <div class="qa"><div class="qn">1</div><div><div class="q">Why is one-way ANOVA appropriate for this research question?</div>
+      <p>The question compares the <em>means</em> of one numerical outcome across one categorical factor with <em>three independent groups</em>, which is exactly the one-way ANOVA design. Using one overall F test rather than three separate two-sample t-tests keeps the Type I error rate at α. Three independent tests at 5% would carry roughly a {{fwer3_pct}}% chance of at least one false alarm (1 − 0.95³ = {{fwer3}}). The assumptions are reasonably met: independent groups, approximate within-group normality (all Shapiro p &gt; 0.05) and similar variances (Levene p = {{lev_p}}, SD ratio {{sd_ratio}}). The balanced design adds robustness.</p></div></div>
+    <div class="qa"><div class="qn">2</div><div><div class="q">What does a significant overall result establish, and what does it not identify?</div>
+      <p>It establishes, at the 5% level, that the three population means are <strong>not all equal</strong>: at least one role’s mean differs from another. It does <strong>not</strong> show <em>which</em> roles differ, how many differ, or by how much. Answering that would need post-hoc comparisons such as Tukey’s HSD, which the task excludes. It also does not measure practical importance (for that we used η² and ω²), prove that role <em>causes</em> the difference, or carry over to players outside the population sampled. Given the undocumented, quota-like sampling of Task 1, that generalisation is itself uncertain.</p></div></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ TASK 5 ══════════════════════════════ -->
+<section class="page">
+  <div class="chapter"><div class="num">05</div><div><div class="eyebrow">Task 5</div><h2>Chi-square <em>goodness-of-fit</em></h2>
+    <div class="vars">Primary · <b>Runs_Scored</b> in 5 normal-probability classes &nbsp;·&nbsp; Supplementary · <b>Player_Role</b> (3 categories)</div></div></div>
+
+  <h3><span class="k">5.1</span>Forming the categories and fixing the expected distribution</h3>
+  <p>The only categorical variable, <em>Player_Role</em>, has counts we already saw in Task 1 (10/10/10). A test whose expected distribution is chosen <em>after</em> seeing the counts would be circular. Our <strong>primary</strong> test therefore makes a justified category from the numerical <em>Runs_Scored</em>, with an expected distribution fixed by a model <em>before</em> any counting.</p>
+  <p><strong>Rationale.</strong> Task 3 raised a specific hypothesis: <em>Runs_Scored is normally distributed.</em> The chi-square goodness-of-fit test checks that hypothesis in a different way, using counts instead of order statistics. Using the fitted normal model N(<span class="hat">μ</span>, <span class="hat">σ</span>²) with maximum-likelihood estimates <span class="hat">μ</span> = {{mu_mle}} and <span class="hat">σ</span> = {{sd_mle}}, we cut the run scale at the model’s 20th, 40th, 60th and 80th percentiles ({{cut1}}, {{cut2}}, {{cut3}}, {{cut4}}). This gives <strong>K = 5 equal-probability classes</strong>, each with expected probability 0.2 and expected count 30 × 0.2 = 6. Equal-probability classes avoid arbitrary bin widths, and K = 5 keeps every expected count comfortably above 5 while leaving positive degrees of freedom after estimating two parameters.</p>
+
+  <table>
+    <caption><b>Table 5.1</b>Observed and expected counts · Runs_Scored in five normal classes</caption>
+    <thead><tr><th class="l">Class</th><th class="l">Runs interval</th><th>Expected p</th><th>Observed O</th><th>Expected E</th><th>(O − E)² / E</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="l">{{c1_lab}}</td><td>0.20</td><td>{{c1_o}}</td><td>{{c1_e}}</td><td>{{c1_x}}</td></tr>
+      <tr><td>2</td><td class="l">{{c2_lab}}</td><td>0.20</td><td>{{c2_o}}</td><td>{{c2_e}}</td><td>{{c2_x}}</td></tr>
+      <tr><td>3</td><td class="l">{{c3_lab}}</td><td>0.20</td><td>{{c3_o}}</td><td>{{c3_e}}</td><td>{{c3_x}}</td></tr>
+      <tr><td>4</td><td class="l">{{c4_lab}}</td><td>0.20</td><td>{{c4_o}}</td><td>{{c4_e}}</td><td>{{c4_x}}</td></tr>
+      <tr><td>5</td><td class="l">{{c5_lab}}</td><td>0.20</td><td>{{c5_o}}</td><td>{{c5_e}}</td><td>{{c5_x}}</td></tr>
+      <tr class="total"><td>Total</td><td class="l"></td><td>1.00</td><td>{{n}}</td><td>30.0</td><td>χ² = {{chi2}}</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <div class="svgwrap">{{fig:fig08_chisq_gof}}</div>
+    <figcaption><b>Figure 8</b><span>Observed against expected counts in the five equal-probability classes. The largest gap is in class 2 (8 against 6), which alone contributes {{c2_x}} of the χ² total of {{chi2}}.</span></figcaption>
+  </figure>
+
+  <div class="test">
+    <div class="th"><b>χ² goodness-of-fit · normal model for Runs_Scored</b><span>Primary inferential procedure · Task 5</span></div>
+    <dl>
+      <dt>Hypotheses</dt><dd>H<sub>0</sub>: Runs_Scored follows a normal distribution, so each of the five classes has probability 0.2. &nbsp;H<sub>1</sub>: the class probabilities are not all 0.2, so the normal model does not fit.</dd>
+      <dt>Assumptions</dt><dd>Independent players; each player falls in exactly one class; every expected count is 6 ≥ 5 ✓</dd>
+      <dt>Level</dt><dd><span class="num">α = 0.05</span> &nbsp;(critical value χ²<sub>0.05, 2</sub> = {{crit5}})</dd>
+      <dt>Statistic · df</dt><dd><span class="num">χ² = Σ(O − E)²/E = {{chi2}}</span> &nbsp;on <span class="num">df = K − 1 − 2 = {{df5}}</span> (two parameters, μ and σ, estimated from the data)</dd>
+      <dt>p-value</dt><dd><span class="num">p = {{p5}}</span>. The parameters came from the ungrouped data, so the exact null distribution lies between χ²(2) and χ²(4) (Chernoff–Lehmann). The p-value therefore lies between {{p5}} and {{p5_upper}}, and the decision is the same at either end.</dd>
+      <dt>Decision</dt><dd class="decision"><span class="chip keep">Fail to reject H₀</span> χ² = {{chi2}} &lt; {{crit5}} and p &gt; 0.05</dd>
+      <dt>Conclusion</dt><dd>The class counts are consistent with a normal distribution for runs scored. Together with the Shapiro–Wilk test and the Q–Q plot, this supports Task 3’s judgement that a normal model is plausible. The effect size is small (Cohen’s w = {{w5}}).</dd>
+    </dl>
+  </div>
+
+  <h3><span class="k">5.2</span>Supplementary: is any role over-represented?</h3>
+  <p>For completeness we also test the role composition against <strong>equal shares</strong> (1/3 each), the natural null for “no role is over- or under-represented”. We report it as a <em>descriptive check</em> rather than a confirmatory test, because the counts were already known from Task 1.</p>
+  <div class="test">
+    <div class="th"><b>χ² goodness-of-fit · Player_Role against equal shares</b><span>Supplementary procedure · Task 5</span></div>
+    <dl>
+      <dt>Hypotheses</dt><dd>H<sub>0</sub>: p<sub>Bat</sub> = p<sub>AR</sub> = p<sub>Bowl</sub> = 1/3. &nbsp;H<sub>1</sub>: at least one role share differs from 1/3.</dd>
+      <dt>Counts</dt><dd>Observed 10 · 10 · 10; expected 10 · 10 · 10 (all ≥ 5 ✓)</dd>
+      <dt>Statistic · df</dt><dd><span class="num">χ² = {{chi2_role}}</span> on <span class="num">df = 2</span> &nbsp;(critical value {{crit_role}}); &nbsp;<span class="num">p = {{p_role}}</span></dd>
+      <dt>Decision</dt><dd class="decision"><span class="chip keep">Fail to reject H₀</span> the fit is perfect</dd>
+      <dt>Conclusion</dt><dd>The sample has exactly equal role shares. The fit is <em>too</em> perfect to be informative. As Task 1 showed, an exact 10/10/10 split has probability {{p_balance}} under random sampling, which points to quota-style selection rather than chance. The test cannot tell us the population’s true role mix.</dd>
+    </dl>
+  </div>
+
+  <div class="reflections">
+    <span class="eyebrow">Reflection questions</span>
+    <div class="qa"><div class="qn">1</div><div><div class="q">How should the expected distribution be justified?</div>
+      <p>It must come from a source <em>independent of the observed counts</em> and be stated <em>before</em> the counts are seen. Valid sources are a theory or model (here, the normal model from Task 3), known population figures (for example, role shares from an official registration list, which this dataset does not provide), earlier studies, or the study design. The class boundaries must be fixed in advance too. Every parameter estimated from the data costs one degree of freedom (two here). Expected counts should be at least 5, which our equal-probability construction guarantees (6 per class). Choosing expected values or bins after looking at the data makes the test circular, which is why the role test is reported only as supplementary.</p></div></div>
+    <div class="qa"><div class="qn">2</div><div><div class="q">What does the overall goodness-of-fit result tell you?</div>
+      <p>It tells us whether the observed counts, taken together, are consistent with the hypothesised distribution. Here χ² = {{chi2}} (p = {{p5}}), so the deviations, the largest being 8 against 6 in class 2, are well within chance variation. The normal model is not contradicted. It does <strong>not</strong> prove the data are normal: with n = 30 and five classes, the test has low power, and binning discards information. It also does not locate a misfit when one exists (for that, inspect the cell contributions or standardised residuals), and it depends on the chosen classes. Like every test here, it is about association and fit, not causation.</p></div></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ CONCLUSIONS ══════════════════════════════ -->
+<section class="page">
+  <div class="chapter"><div class="num">06</div><div><div class="eyebrow">Synthesis</div><h2>Conclusions &amp; <em>limitations</em></h2>
+    <div class="vars">One question, five lenses</div></div></div>
+
+  <table>
+    <caption><b>Table 6.1</b>Summary of findings</caption>
+    <thead><tr><th class="l" style="width:17%">Task</th><th class="l">Method</th><th class="l">Key result</th><th class="l" style="width:34%">Meaning in context</th></tr></thead>
+    <tbody>
+      <tr><td>1 · Sampling</td><td class="l">Design review</td><td class="l">Undocumented; exact 10/10/10 split (P = {{p_balance}} under SRS)</td><td class="l">Quota-like, non-probability sample. Generalise with caution.</td></tr>
+      <tr><td>2 · Estimation</td><td class="l"><span class="bar">x</span>, s², MSE, resampling</td><td class="l"><span class="bar">x</span> = {{xbar}}, s² = {{s2}}, SE = {{se}}, 95% CI {{ci_lo}}–{{ci_hi}}</td><td class="l">MSE = variance + bias². It falls like 1/n. Unbiased does not mean minimum MSE.</td></tr>
+      <tr><td>3 · Normal / CLT</td><td class="l">Shape, Q–Q, Shapiro–Wilk, resampling</td><td class="l">W = {{sw_W}}, p = {{sw_p}}; mean SD at n = 30: {{clt_r_30_sd}} vs {{clt_r_30_th}}</td><td class="l">Normal model plausible. Means become normal even from a skewed parent.</td></tr>
+      <tr class="hl"><td>4 · ANOVA</td><td class="l">One-way ANOVA</td><td class="l">F(2, 27) = {{F}}, p = {{pF_sci}}, η² = {{eta2}}</td><td class="l">Mean runs differ by role, and the effect is very large. Not causal.</td></tr>
+      <tr><td>5 · χ² GOF</td><td class="l">Pearson χ²</td><td class="l">χ² = {{chi2}}, df = {{df5}}, p = {{p5}}</td><td class="l">Counts are consistent with the normal model.</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="k">6.1</span>Answer to the research question</h3>
+  <p>A player in this sample scores <strong>{{xbar}} runs</strong> on average (95% CI {{ci_lo}}–{{ci_hi}}). Individual run totals are spread widely (SD {{s}}), but they are well described by a normal model. <strong>Playing role is the dominant source of variation</strong>. Mean runs differ across roles with very strong statistical evidence (F = {{F}}, p = {{pF_sci}}), and role accounts for about {{eta2_pct}}% of the variation. Because the role mix in the sample was fixed rather than random, the overall mean depends on that mix. A population with a different balance of roles would have a different mean, so role-specific summaries are more informative than a single pooled figure.</p>
+
+  <h3><span class="k">6.2</span>Limitations</h3>
+  <ul class="clean">
+    <li><strong>Undocumented, quota-like sampling.</strong> Representativeness cannot be assumed. Standard errors cover random error only, not selection bias.</li>
+    <li><strong>Small sample.</strong> With n = 30 (10 per role), assumption checks have little power and the SE of the mean is about {{se}} runs.</li>
+    <li><strong>Definitions.</strong> The reference period of Runs_Scored and the scales of Fitness_Score and Practice_Hours are undocumented.</li>
+    <li><strong>Observational data.</strong> Role is not randomly assigned. Batting order, opportunity and selection confound the role–runs association.</li>
+    <li><strong>Resampling scope.</strong> The pseudo-population is the sample itself, so resampling cannot reveal what the sample misses.</li>
+  </ul>
+
+  <h3><span class="k">6.3</span>Reproducibility</h3>
+  <p class="note">Run <span class="mono">python analysis.py</span> from the repository root. It reads <span class="mono">data/Dataset_13.csv</span> and writes <span class="mono">figures/</span>, <span class="mono">results/tables/</span> and <span class="mono">results/results.json</span>. Seed {{seed}} (NumPy PCG64), B = {{B}}. Python {{v_python}} · NumPy {{v_numpy}} · pandas {{v_pandas}} · SciPy {{v_scipy}} · Matplotlib {{v_matplotlib}}.</p>
+</section>
+
+</body>
+</html>

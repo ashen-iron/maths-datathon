@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Runs, Roles &amp; Randomness · MFAD Datathon</title>
+<meta name="description" content="A statistical inquiry into thirty cricketers: sampling design, point estimation and MSE, the normal model and the Central Limit Theorem, one-way ANOVA and chi-square goodness-of-fit.">
+<meta name="theme-color" content="#07090D">
+<meta property="og:title" content="Runs, Roles & Randomness">
+<meta property="og:description" content="MFAD Datathon · Problem Statement 1 · Dataset 13 — a statistical inquiry into thirty cricketers.">
+<meta property="og:image" content="assets/img/social-card.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%2307090D' stroke='%23C9A35A' stroke-width='2'/%3E%3Ctext x='32' y='43' font-family='Georgia' font-style='italic' font-size='32' fill='%23E6CC94' text-anchor='middle'%3Em%3C/text%3E%3C/svg%3E">
+<link rel="preload" href="assets/fonts/CormorantGaramond-300-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/Jost-200-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/fonts.css">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+<div class="progress" aria-hidden="true"></div>
+<div class="tt" role="status" aria-live="polite"></div>
+
+<!-- ═══════════════ NAV ═══════════════ -->
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Back to top"><span class="seal">m</span><span class="txt">MFAD · Datathon</span></a>
+    <nav class="links" aria-label="Chapters">
+      <a href="#study">The Study</a><a href="#sampling">Sampling</a><a href="#estimation">Estimation</a>
+      <a href="#normality">Normality</a><a href="#anova">ANOVA</a><a href="#fit">Fit</a><a href="#verdict">Verdict</a>
+    </nav>
+    <div style="display:flex;gap:10px;align-items:center">
+      <a class="btn small" href="downloads/MFAD_Datathon_Report.pdf" target="_blank" rel="noopener">Report
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4v12m0 0l-5-5m5 5l5-5M5 20h14"/></svg></a>
+      <button class="menu-btn" aria-label="Open menu" aria-expanded="false"><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero" id="top">
+  <canvas id="rain" aria-hidden="true"></canvas>
+  <svg class="rings" viewBox="0 0 200 200" aria-hidden="true">
+    <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E6CC94"/><stop offset="1" stop-color="#8C6A2E"/></linearGradient></defs>
+    <g fill="none" stroke="url(#rg)">
+      <circle cx="100" cy="100" r="98" stroke-opacity=".10" stroke-width=".18"/>
+      <circle cx="100" cy="100" r="82" stroke-opacity=".14" stroke-width=".18" stroke-dasharray=".6 1.4"/>
+      <circle cx="100" cy="100" r="64" stroke-opacity=".18" stroke-width=".18"/>
+      <circle cx="100" cy="100" r="46" stroke-opacity=".22" stroke-width=".18"/>
+      <circle cx="100" cy="100" r="30" stroke-opacity=".26" stroke-width=".18"/>
+      <rect x="97.4" y="87" width="5.2" height="26" stroke-opacity=".45" stroke-width=".22"/>
+      <path d="M95.5 90.5h9M95.5 109.5h9" stroke-opacity=".45" stroke-width=".18"/>
+      <path d="M100 2v196M2 100h196" stroke-opacity=".06" stroke-width=".15"/>
+    </g>
+  </svg>
+  <div class="wrap">
+    <div class="kicker">PES University · MFAD Datathon · Problem Statement 1 · Dataset 13</div>
+    <h1><span class="l"><span>Runs, Roles</span></span><span class="l"><span>&amp; <em>Randomness</em></span></span></h1>
+    <p class="lede">A statistical inquiry into thirty cricketers: how runs are sampled, estimated and distributed, and whether a player’s role changes what we should expect.</p>
+    <div class="ctas">
+      <a class="btn" href="downloads/MFAD_Datathon_Report.pdf" target="_blank" rel="noopener">Read the report
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14m0 0l-6-6m6 6l-6 6"/></svg></a>
+      <a class="btn ghost" href="#study">Explore the findings</a>
+    </div>
+    <div class="hero-stats">
+      <div><b data-count="30" data-dec="0">30</b><span>Players observed</span></div>
+      <div><b data-count="213.60" data-dec="2">213.60</b><span>Mean runs scored</span></div>
+      <div><b>F = <span data-count="32.92" data-dec="2">32.92</span></b><span>ANOVA · runs by role</span></div>
+      <div><b><i class="m">η</i>² = <span data-count="0.709" data-dec="3">0.709</span></b><span>Variance explained by role</span></div>
+    </div>
+  </div>
+  <div class="scroll-cue" aria-hidden="true"></div>
+</section>
+
+<div class="marquee" aria-hidden="true"><div class="track" id="marquee">
+  <span><b>Mean</b><span class="bar-x">x</span> = 213.60</span><span class="dot">✦</span>
+  <span><b>Variance</b>s² = 6,716.39</span><span class="dot">✦</span>
+  <span><b>95% CI</b>183.0 — 244.2</span><span class="dot">✦</span>
+  <span><b>Shapiro–Wilk</b>W = 0.9812, p = 0.857</span><span class="dot">✦</span>
+  <span><b>ANOVA</b>F(2, 27) = 32.92</span><span class="dot">✦</span>
+  <span><b>Effect</b>η² = 0.709</span><span class="dot">✦</span>
+  <span><b>Goodness-of-fit</b>χ² = 1.000, p = 0.607</span><span class="dot">✦</span>
+  <span><b>Resamples</b>B = 20,000</span><span class="dot">✦</span>
+</div></div>
+
+<main>
+<!-- ═══════════════ 0 · THE STUDY ═══════════════ -->
+<section class="chapter" id="study">
+  <div class="wrap">
+    <div class="ch-head">
+      <div class="numeral" aria-hidden="true">0</div>
+      <div data-reveal>
+        <div class="eyebrow">The study</div>
+        <h2 class="display">Thirty players, <em>one question</em></h2>
+        <p class="intro">How many runs does a typical player score, how precisely can we estimate it, is a normal model reasonable, and does run output differ between batters, all-rounders and bowlers?</p>
+        <div class="vars"><span class="tag"><i></i>Runs_Scored · outcome</span><span class="tag"><i style="background:var(--ar)"></i>Player_Role · factor</span><span class="tag"><i style="background:var(--faint)"></i>Player_ID · excluded</span></div>
+      </div>
+    </div>
+
+    <div class="chart-card" data-reveal>
+      <div class="chart-head">
+        <div class="chart-title">The thirty, on one axis<small>Each dot is a player. Hover or tab through them, then split the field by role.</small></div>
+        <div class="controls" style="margin:0">
+          <div class="seg" role="group" aria-label="Layout"><button aria-pressed="true" data-swarm="all">All players</button><button aria-pressed="false" data-swarm="role">By role</button><button aria-pressed="false" data-swarm="table">Table</button></div>
+        </div>
+      </div>
+      <div class="legend" style="margin-bottom:8px"><span><i style="background:var(--bat)"></i>Batter</span><span><i style="background:var(--ar)"></i>All-rounder</span><span><i style="background:var(--bowl)"></i>Bowler</span></div>
+      <div class="chart" id="swarm"></div>
+      <div class="tbl-wrap" id="roster" hidden></div>
+      <div class="caption"><b>Figure</b>The pooled distribution looks like one gentle hill. Split by role, it becomes three separate groups, which is what Chapter IV tests.</div>
+    </div>
+
+    <div class="grid-2 block">
+      <div data-reveal>
+        <h3 class="sub">Why <em>Runs_Scored</em></h3>
+        <div class="prose">
+          <p>It is the most direct measure of output that applies to every role. It is complete (30 of 30), varies widely (70–389) and supports all five tasks, so the whole inquiry follows a single question. <em>Player_Role</em> is the only categorical variable, and its three levels are exactly what one-way ANOVA needs.</p>
+          <p>The file has 0 missing values and 0 duplicate rows. <em>Player_ID</em> is an identifier and is never used in a calculation.</p>
+        </div>
+      </div>
+      <div data-reveal data-d="1">
+        <div class="callout"><div class="eyebrow">Limitation · reference period</div>
+          <div class="prose"><p>The period the counts cover (season, tournament or career) is not documented. Runs are almost uncorrelated with matches played (r = −0.07), so they are unlikely to be career totals. We read them as runs in the study’s reference period.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ I · SAMPLING ═══════════════ -->
+<section class="chapter" id="sampling">
+  <div class="wrap">
+    <div class="ch-head">
+      <div class="numeral" aria-hidden="true">I</div>
+      <div data-reveal>
+        <div class="eyebrow">Task 1 · Sampling design</div>
+        <h2 class="display">Who, exactly, <em>are these thirty?</em></h2>
+        <p class="intro">The observational unit is one player. The sample is 30 players. How they were chosen is not documented, so we do not assume the sample is random or representative.</p>
+      </div>
+    </div>
+
+    <div class="split">
+      <div data-reveal>
+        <div class="funnel">
+          <div class="lvl"><div class="k">Target population</div><div class="t">Players of the limited-overs competition or squad system the records come from. League, season and country are not documented.</div></div>
+          <div class="lvl unknown"><div class="k">Sampling frame</div><div class="t">Unknown. No registry, list or selection rule is provided.</div></div>
+          <div class="lvl unknown"><div class="k">Selection</div><div class="t">Undocumented. The exact 10 / 10 / 10 split suggests quotas.</div></div>
+          <div class="lvl"><div class="k">Sample</div><div class="t">n = 30 players, PL01–PL30, with complete records.</div></div>
+        </div>
+      </div>
+      <div data-reveal data-d="1">
+        <div class="pull">An exact <em>10 / 10 / 10</em> split has probability <em>0.0270</em> under random sampling.</div>
+        <div class="waffle" id="waffle" aria-label="30 players: 10 batters, 10 all-rounders, 10 bowlers"></div>
+        <div class="prose" style="margin-top:28px">
+          <p>Under simple random sampling from a population with equal role shares, a perfectly balanced split happens only about 2.7% of the time. That points to a <strong>designed</strong> selection. It could be <strong>quota sampling</strong> (non-probability) or <strong>stratified sampling with equal allocation</strong> (probability), and only documented randomisation within each role could tell them apart. Without that, we treat the sample as <strong>non-probability</strong>.</p>
+          <p>The quantity of interest is the <strong>population mean</strong> <i class="m">μ</i> = E[Runs_Scored]. Because role matters so much, <i class="m">μ</i> = Σ <i class="m">w</i><sub>r</sub><i class="m">μ</i><sub>r</sub> depends on the population’s role shares, and the sample fixes each share at one third.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="reflect" data-reveal>
+      <div class="eyebrow">Reflection questions</div>
+      <details class="qa"><summary><span class="qn">1</span><span class="q">How could the sampling process affect representativeness?</span><span class="pm"></span></summary>
+        <div class="a prose"><p><strong>Role mix.</strong> Equal quotas force equal role weights. If the real population has more bowlers, the sample over-represents high scorers and <span class="bar-x">x</span> overstates <i class="m">μ</i>. Role explains about 70.9% of run variation, and the role means range from 128.2 to 294.2, so the role weights matter a great deal.</p>
+        <p><strong>Selection bias.</strong> Hand-picked regulars or in-form players inflate output. A bigger sample would not fix this, because it is bias, not noise. <strong>Coverage and time:</strong> players without records cannot appear, and the reference period is unknown. With n = 30, even a good design leaves a standard error of about 14.96 runs.</p></div></details>
+      <details class="qa"><summary><span class="qn">2</span><span class="q">What sampling design could improve coverage of the target population?</span><span class="pm"></span></summary>
+        <div class="a prose"><p>Start from a <strong>complete frame</strong>, such as the official season registration list. Draw a <strong>stratified random sample by role</strong>, with proportional allocation or with <strong>Neyman allocation</strong>, which gives more places to more variable strata (batter SD 54.94 against all-rounder SD 35.82). Apply design weights if the shares are not proportional. Teams form natural clusters, so a <strong>two-stage design</strong> (random teams, then random players) is a cheaper option. In every case, document the inclusion probabilities and a common reference period, and increase n.</p></div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ II · ESTIMATION ═══════════════ -->
+<section class="chapter" id="estimation">
+  <div class="wrap">
+    <div class="ch-head">
+      <div class="numeral" aria-hidden="true">II</div>
+      <div data-reveal>
+        <div class="eyebrow">Task 2 · Point estimation &amp; MSE</div>
+        <h2 class="display">Precise is not <em>the same as right</em></h2>
+        <p class="intro">An estimator is judged by its whole sampling distribution: its <strong>bias</strong> (systematic error), its <strong>variance</strong> (random error) and their sum, the <strong>mean squared error</strong>.</p>
+      </div>
+    </div>
+
+    <div class="tiles" data-reveal>
+      <div class="tile"><div class="k">Sample mean</div><div class="v">213.60<small>runs</small></div><div class="d">Unbiased for μ; SE = s/√n = 14.96</div></div>
+      <div class="tile"><div class="k">Sample variance</div><div class="v">6,716.39<small>runs²</small></div><div class="d">Divisor n − 1, unbiased for σ²; s = 81.95</div></div>
+      <div class="tile"><div class="k">MSE of the mean</div><div class="v">223.88<small>runs²</small></div><div class="d">= s²/n, because the bias is zero</div></div>
+      <div class="tile"><div class="k">95% interval for the mean</div><div class="v">183.0–244.2</div><div class="d">t-interval, t*(29) = 2.045</div></div>
+    </div>
+
+    <div class="block grid-2" style="align-items:center">
+      <div data-reveal>
+        <div class="pull" style="font-size:clamp(28px,2.8vw,42px)">MSE(<span class="hat">θ</span>) = Var(<span class="hat">θ</span>) + Bias(<span class="hat">θ</span>)<sup>2</sup></div>
+      </div>
+      <div class="prose" data-reveal data-d="1">
+        <p>To see these quantities we need a population with <em>known</em> parameters. We treat the 30 values as a <strong>pseudo-population</strong> (<i class="m">μ*</i> = 213.60, <i class="m">σ*</i>² = 6,492.51), draw 20,000 samples of each size, and measure every estimator against the truth. The lab below repeats this live in your browser.</p>
+      </div>
+    </div>
+
+    <div class="chart-card block" data-reveal>
+      <div class="chart-head">
+        <div class="chart-title">Estimator lab<small>Pick an estimator and a sample size, then draw 4,000 samples from the pseudo-population.</small></div>
+      </div>
+      <div class="controls">
+        <div class="seg" role="group" aria-label="Estimator" id="labEst">
+          <button aria-pressed="true" data-est="mean">Mean</button><button aria-pressed="false" data-est="median">Median</button><button aria-pressed="false" data-est="s2"><span class="nt">s² · n−1</span></button><button aria-pressed="false" data-est="s2n"><span class="nt"><span class="hat">σ</span>² · n</span></button>
+        </div>
+        <label class="ctl-label" for="labN">Sample size n = <span class="readout" id="labNv">10</span></label>
+        <input type="range" id="labN" min="2" max="60" value="10" step="1">
+        <button class="btn small ghost" id="labGo">Draw again</button>
+      </div>
+      <div class="chart" id="lab"></div>
+      <div class="live" id="labLive"></div>
+      <div class="note-live">Live simulation: numbers change on every draw. The report’s numbers come from <code>analysis.py</code> (seed 20261118).</div>
+    </div>
+
+    <div class="grid-2 block">
+      <div class="chart-card" data-reveal>
+        <div class="chart-head"><div class="chart-title">MSE falls like 1/n<small>Log–log axes. B = 20,000 per point.</small></div></div>
+        <div class="legend"><span><i class="line" style="background:var(--ivory)"></i>Sample mean</span><span><i class="line" style="background:var(--gold)"></i>Sample median</span><span><i class="line" style="background:rgba(201,163,90,.35);height:8px"></i>Theory σ²/n</span></div>
+        <div class="chart" id="mse"></div>
+        <div class="caption"><b>Read</b>The mean tracks σ²/n exactly. The median is 1.84× less efficient at n = 30.</div>
+      </div>
+      <div class="chart-card" data-reveal data-d="1">
+        <div class="chart-head"><div class="chart-title">Unbiased ≠ best<small>MSE = variance + bias² for two variance estimators</small></div></div>
+        <div class="legend"><span><i class="sq" style="background:#6B7690"></i>Variance · s²</span><span><i class="sq" style="background:var(--gold)"></i>Variance · σ̂²</span><span><i class="sq" style="background:repeating-linear-gradient(45deg,#E6CC94 0 2px,transparent 2px 4px)"></i>Bias²</span></div>
+        <div class="chart" id="decomp"></div>
+        <div class="caption"><b>Read</b>The biased σ̂² wins on MSE (12.47M against 16.91M runs⁴ at n = 5). The gap closes as n grows.</div>
+      </div>
+    </div>
+
+    <div class="reflect" data-reveal>
+      <div class="eyebrow">Reflection questions</div>
+      <details class="qa"><summary><span class="qn">1</span><span class="q">What does MSE capture beyond estimator variance?</span><span class="pm"></span></summary>
+        <div class="a prose"><p><strong>Bias²</strong>, the systematic error. Variance measures spread around the estimator’s own average. MSE measures spread around the <em>truth</em>. An estimator can be very precise and still consistently wrong. Because both errors share one scale, MSE also lets us compare biased and unbiased estimators fairly, which is how σ̂² beats s². One caution: resampling MSE ignores selection bias from the non-random sampling in Task 1, and that bias would add to the real error.</p></div></details>
+      <details class="qa"><summary><span class="qn">2</span><span class="q">How can sample size affect the precision and MSE of an estimator?</span><span class="pm"></span></summary>
+        <div class="a prose"><p>Var(<span class="bar-x">x</span>) = σ²/n, so precision grows in proportion to n and the standard error shrinks like 1/√n. The MSE of the mean falls from 1,294.4 at n = 5 to 218.7 at n = 30, and halving the error needs four times the data. Small-sample biases such as −σ²/n also vanish, so both variance estimators are consistent. Design bias does <em>not</em> shrink with n, though. A larger quota sample just estimates the wrong quantity more precisely.</p></div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ III · NORMALITY & CLT ═══════════════ -->
+<section class="chapter" id="normality">
+  <div class="wrap">
+    <div class="ch-head">
+      <div class="numeral" aria-hidden="true">III</div>
+      <div data-reveal>
+        <div class="eyebrow">Task 3 · Normal model &amp; CLT</div>
+        <h2 class="display">The bell, <em>and why it rings</em></h2>
+        <p class="intro">Individual run totals are spread widely but symmetrically. Sample means become normal even when the variable behind them is far from normal.</p>
+      </div>
+    </div>
+
+    <div class="tiles" data-reveal>
+      <div class="tile"><div class="k">Mean / median</div><div class="v">213.60 <small>/</small> 219.0</div><div class="d">Close together: near symmetry</div></div>
+      <div class="tile"><div class="k">Skewness · excess kurtosis</div><div class="v">0.099 <small>/</small> −0.386</div><div class="d">Symmetric, slightly light tails</div></div>
+      <div class="tile"><div class="k">Within ±1 / ±2 SD</div><div class="v">66.7% <small>/</small> 96.7%</div><div class="d">Normal: 68.3% · 95.4%</div></div>
+      <div class="tile"><div class="k">Shapiro–Wilk</div><div class="v">p = 0.857</div><div class="d">W = 0.9812; no evidence against normality</div></div>
+    </div>
+
+    <div class="grid-2 block">
+      <div class="chart-card" data-reveal>
+        <div class="chart-head"><div class="chart-title">Distribution of observations<small>Histogram with the fitted normal curve</small></div></div>
+        <div class="chart" id="hist"></div>
+      </div>
+      <div class="chart-card" data-reveal data-d="1">
+        <div class="chart-head"><div class="chart-title">Normal Q–Q plot<small>Points near the line mean the normal model fits</small></div></div>
+        <div class="chart" id="qq"></div>
+      </div>
+    </div>
+
+    <div class="block grid-2">
+      <div class="test" data-reveal>
+        <div class="th"><b>Shapiro–Wilk test</b><span>Task 3 · inferential</span></div>
+        <dl>
+          <dt>Hypotheses</dt><dd>H₀: Runs_Scored is normally distributed in the population. H₁: it is not.</dd>
+          <dt>Level</dt><dd><span class="n">α = 0.05</span></dd>
+          <dt>Statistic</dt><dd><span class="n">W = 0.9812</span> · n = 30 (no df for W)</dd>
+          <dt>p-value</dt><dd><span class="n">p = 0.857</span></dd>
+          <dt>Decision</dt><dd><span class="chip keep">Fail to reject H₀</span></dd>
+          <dt>Conclusion</dt><dd>A normal model is plausible for individual run totals. This is not proof of normality, because power is limited at n = 30.</dd>
+        </dl>
+      </div>
+      <div class="prose" data-reveal data-d="1">
+        <h3 class="sub">Players versus <em>averages</em></h3>
+        <p>The <strong>distribution of observations</strong> describes how individual players differ: centre <i class="m">μ</i>, spread <i class="m">σ</i> ≈ 81.95 runs. The <strong>sampling distribution of <span class="bar-x">x</span></strong> describes how the average of n players would vary from sample to sample. It has the same centre, a much smaller spread of <i class="m">σ</i>/√n ≈ 14.96 runs at n = 30, and a shape that tends towards normal.</p>
+        <p>The <strong>Central Limit Theorem</strong> requires independent, identically distributed draws with finite variance, and an n that is large enough for the parent’s skewness. Try it with a deliberately skewed parent: the share of high-output players (Runs ≥ 300), which is Bernoulli with p = 0.167.</p>
+      </div>
+    </div>
+
+    <div class="chart-card block" data-reveal>
+      <div class="chart-head">
+        <div class="chart-title">CLT lab<small>10,000 resampled means. The ivory curve is the CLT prediction N(μ, σ²/n).</small></div>
+      </div>
+      <div class="controls">
+        <div class="seg" role="group" aria-label="Parent" id="cltParent"><button aria-pressed="true" data-p="runs">Runs_Scored</button><button aria-pressed="false" data-p="high">I(Runs ≥ 300)</button></div>
+        <div class="seg" role="group" aria-label="Sample size" id="cltN"><button aria-pressed="false" data-n="1"><span class="nt">n</span> = 1</button><button aria-pressed="false" data-n="2">2</button><button aria-pressed="true" data-n="5">5</button><button aria-pressed="false" data-n="10">10</button><button aria-pressed="false" data-n="30">30</button><button aria-pressed="false" data-n="50">50</button></div>
+      </div>
+      <div class="chart" id="clt"></div>
+      <div class="live" id="cltLive"></div>
+      <div class="note-live">In the report (seed 20261118), the skewness of the Bernoulli means falls from 1.811 at n = 1 to 0.801 at n = 5 and 0.338 at n = 30, close to the theoretical γ/√n.</div>
+    </div>
+
+    <div class="reflect" data-reveal>
+      <div class="eyebrow">Reflection questions</div>
+      <details class="qa"><summary><span class="qn">1</span><span class="q">Which features support or weaken a normal-model assumption?</span><span class="pm"></span></summary>
+        <div class="a prose"><p><strong>Support:</strong> mean ≈ median, skewness 0.099, no outliers, a straight Q–Q plot (r = 0.994), empirical-rule shares close to normal, Shapiro–Wilk p = 0.857 and χ² p = 0.607.</p>
+        <p><strong>Weaken:</strong> runs are discrete counts bounded at zero, though the model gives a negative total a probability of only 0.0046. There is mild platykurtosis (−0.386) and an empty bin. Above all, the data mix three role groups with very different means, so a single normal curve describes the data but does not explain them. And n = 30 gives normality tests little power.</p></div></details>
+      <details class="qa"><summary><span class="qn">2</span><span class="q">Why can sample means be approximately normal when individual observations are not?</span><span class="pm"></span></summary>
+        <div class="a prose"><p>A mean adds up many independent contributions, so extremes in opposite directions cancel. Spread shrinks like 1/√n, skewness like γ/√n and excess kurtosis like κ/n. The two-spike 0/1 parent (skewness 1.79) produces means with skewness 0.338 at n = 30, close to the theoretical 0.33. The CLT needs independence and finite variance, not normal data, and more skew calls for a larger n (here <i class="m">np</i> = 5.0 &lt; 10, so a little skew remains).</p></div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ IV · ANOVA ═══════════════ -->
+<section class="chapter" id="anova">
+  <div class="wrap">
+    <div class="ch-head">
+      <div class="numeral" aria-hidden="true">IV</div>
+      <div data-reveal>
+        <div class="eyebrow">Task 4 · One-way ANOVA</div>
+        <h2 class="display">Role is <em>destiny,</em> statistically</h2>
+        <p class="intro">Outcome: Runs_Scored. Factor: Player_Role, with three independent, balanced groups of ten. Does mean run output differ by role?</p>
+      </div>
+    </div>
+
+    <div class="split" style="align-items:center">
+      <div class="gauge" data-reveal>
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <circle cx="100" cy="100" r="86" fill="none" stroke="rgba(236,226,207,.08)" stroke-width="2"/>
+          <circle id="gaugeArc" cx="100" cy="100" r="86" fill="none" stroke="url(#gg)" stroke-width="2.6" stroke-linecap="round" transform="rotate(-90 100 100)" stroke-dasharray="540.35" stroke-dashoffset="540.35"/>
+          <circle cx="100" cy="100" r="72" fill="none" stroke="rgba(201,163,90,.18)" stroke-width=".6" stroke-dasharray="1 3"/>
+          <defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E6CC94"/><stop offset="1" stop-color="#8C6A2E"/></linearGradient></defs>
+        </svg>
+        <div class="val"><b>70.9<small style="font-size:.4em">%</small></b><span>Variation explained · <i class="m" style="text-transform:none;letter-spacing:0;font-size:14px">η</i>²</span></div>
+      </div>
+      <div data-reveal data-d="1">
+        <div class="tiles" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+          <div class="tile"><div class="k"><span class="legend"><span><i style="background:var(--bat)"></i>Batters</span></span></div><div class="v">294.2</div><div class="d">s = 54.94</div></div>
+          <div class="tile"><div class="k"><span class="legend"><span><i style="background:var(--ar)"></i>All-rounders</span></span></div><div class="v">218.4</div><div class="d">s = 35.82</div></div>
+          <div class="tile"><div class="k"><span class="legend"><span><i style="background:var(--bowl)"></i>Bowlers</span></span></div><div class="v">128.2</div><div class="d">s = 44.64</div></div>
+        </div>
+        <div class="prose" style="margin-top:28px"><p>Role is associated with 70.9% of the variation in runs (ω² = 0.680, Cohen’s f = 1.56). By any convention this is a very large effect. It is <strong>observational</strong>: batters are selected for batting and bat higher in the order, so role reflects both skill and opportunity.</p></div>
+      </div>
+    </div>
+
+    <div class="chart-card block" data-reveal>
+      <div class="chart-head"><div class="chart-title">Runs by role<small>Dots are players, bands are interquartile ranges, bars are group means. The dashed line is the grand mean.</small></div>
+        <div class="legend"><span><i style="background:var(--bat)"></i>Batter</span><span><i style="background:var(--ar)"></i>All-rounder</span><span><i style="background:var(--bowl)"></i>Bowler</span></div></div>
+      <div class="chart" id="roles"></div>
+    </div>
+
+    <div class="grid-2 block">
+      <div data-reveal>
+        <h3 class="sub">Assumptions, <em>checked</em></h3>
+        <div class="prose">
+          <p><strong>Independence:</strong> one role per player, each player counted once. Independence between players cannot be verified, because sampling is undocumented.</p>
+          <p><strong>Normality within groups:</strong> Shapiro–Wilk p = 0.967, 0.534 and 0.188; residuals W = 0.970, p = 0.530.</p>
+          <p><strong>Equal variances:</strong> SD ratio 1.53 &lt; 2, and the Brown–Forsythe Levene test gives W = 1.234 on df (2, 27), p = 0.307. The test does not reject H₀ of equal variances, so the classical pooled ANOVA is appropriate.</p>
+        </div>
+        <div class="tbl-wrap" style="margin-top:22px">
+          <table class="lux"><thead><tr><th>Source</th><th>SS</th><th>df</th><th>MS</th><th>F</th><th>p</th></tr></thead>
+            <tbody><tr class="hl"><td>Between roles</td><td>138,125.6</td><td>2</td><td>69,062.8</td><td>32.92</td><td>5.75 × 10<sup>−8</sup></td></tr>
+            <tr><td>Within roles</td><td>56,649.6</td><td>27</td><td>2,098.1</td><td></td><td></td></tr>
+            <tr class="total"><td>Total</td><td>194,775.2</td><td>29</td><td></td><td></td><td></td></tr></tbody></table>
+        </div>
+      </div>
+      <div class="test" data-reveal data-d="1">
+        <div class="th"><b>One-way ANOVA F test</b><span>Task 4 · inferential</span></div>
+        <dl>
+          <dt>Hypotheses</dt><dd>H₀: μ<sub>Bat</sub> = μ<sub>AR</sub> = μ<sub>Bowl</sub>. H₁: at least one role’s mean differs.</dd>
+          <dt>Level</dt><dd><span class="n">α = 0.05</span> · critical F = 3.354</dd>
+          <dt>Statistic · df</dt><dd><span class="n">F = 32.9163</span> on (2, 27)</dd>
+          <dt>p-value</dt><dd><span class="n">p = 5.75 × 10<sup>−8</sup></span></dd>
+          <dt>Decision</dt><dd><span class="chip rej">Reject H₀</span></dd>
+          <dt>Conclusion</dt><dd>There is very strong evidence that mean runs differ across roles. This test does not say <em>which</em> roles differ, and no post-hoc tests were run, as instructed.</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="chart-card block" data-reveal>
+      <div class="chart-head"><div class="chart-title">How extreme is F = 32.92?<small>The F(2, 27) reference distribution under H₀, with the 5% rejection region shaded</small></div></div>
+      <div class="chart" id="fdist"></div>
+    </div>
+
+    <div class="reflect" data-reveal>
+      <div class="eyebrow">Reflection questions</div>
+      <details class="qa"><summary><span class="qn">1</span><span class="q">Why is one-way ANOVA appropriate for this research question?</span><span class="pm"></span></summary>
+        <div class="a prose"><p>The question compares the means of one numerical outcome across one categorical factor with three independent groups. One overall F test keeps the Type I error rate at α, whereas three t-tests would raise the chance of a false alarm to about 14.3%. The assumptions hold reasonably well, and the balanced design adds robustness.</p></div></details>
+      <details class="qa"><summary><span class="qn">2</span><span class="q">What does a significant overall result establish, and what does it not identify?</span><span class="pm"></span></summary>
+        <div class="a prose"><p>It establishes that the three population means are <strong>not all equal</strong>. It does not show which roles differ, how many differ or by how much, because that needs post-hoc tests, which are excluded here. It does not measure practical importance (η² does that), prove that role causes the difference, or guarantee the result carries over beyond the population sampled.</p></div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ V · CHI-SQUARE ═══════════════ -->
+<section class="chapter" id="fit">
+  <div class="wrap">
+    <div class="ch-head">
+      <div class="numeral" aria-hidden="true">V</div>
+      <div data-reveal>
+        <div class="eyebrow">Task 5 · Chi-square goodness-of-fit</div>
+        <h2 class="display">Counting <em>against a model</em></h2>
+        <p class="intro">The expected distribution was fixed before any counting. Runs were cut into five classes that are equally likely under the fitted normal model, so 6 players are expected in each.</p>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="prose" data-reveal>
+        <p><strong>Why this expected distribution?</strong> Task 3 raised a specific hypothesis: Runs_Scored is normal. Using maximum-likelihood estimates (<span class="hat">μ</span> = 213.60, <span class="hat">σ</span> = 80.58), we cut at the model’s 20th, 40th, 60th and 80th percentiles (145.8, 193.2, 234.0, 281.4). Equal-probability classes avoid arbitrary bin widths, and every expected count is 6 ≥ 5.</p>
+        <p>The role counts (10/10/10) were already known from Task 1, so a role-based test would be circular. We report it only as a supplementary check: χ² = 0.000, p = 1.000. The fit is perfect, which again suggests quota selection.</p>
+      </div>
+      <div class="chart-card" data-reveal data-d="1">
+        <div class="chart-head"><div class="chart-title">Observed versus expected<small>χ² = 1.000 · df = 2 · p = 0.607</small></div>
+          <div class="legend"><span><i class="sq" style="background:rgba(236,226,207,.22)"></i>Expected</span><span><i class="sq" style="background:var(--gold)"></i>Observed</span></div></div>
+        <div class="chart" id="chi"></div>
+      </div>
+    </div>
+
+    <div class="grid-2 block">
+      <div class="test" data-reveal>
+        <div class="th"><b>χ² goodness-of-fit · normal model</b><span>Task 5 · primary</span></div>
+        <dl>
+          <dt>Hypotheses</dt><dd>H₀: runs follow the normal model, so each class has p = 0.2. H₁: they do not.</dd>
+          <dt>Level</dt><dd><span class="n">α = 0.05</span> · critical χ² = 5.991</dd>
+          <dt>Statistic · df</dt><dd><span class="n">χ² = 1.000</span> on df = 5 − 1 − 2 = 2</dd>
+          <dt>p-value</dt><dd><span class="n">p = 0.607</span> (Chernoff–Lehmann bound with df = 4: 0.910)</dd>
+          <dt>Decision</dt><dd><span class="chip keep">Fail to reject H₀</span></dd>
+          <dt>Conclusion</dt><dd>The counts are consistent with a normal distribution (Cohen’s w = 0.183). This agrees with Task 3.</dd>
+        </dl>
+      </div>
+      <div class="tbl-wrap" data-reveal data-d="1">
+        <table class="lux"><thead><tr><th>Class</th><th>Runs</th><th>O</th><th>E</th><th>(O−E)²/E</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>&lt; 145.8</td><td>5</td><td>6.0</td><td>0.167</td></tr>
+            <tr class="hl"><td>2</td><td>145.8 – 193.2</td><td>8</td><td>6.0</td><td>0.667</td></tr>
+            <tr><td>3</td><td>193.2 – 234.0</td><td>5</td><td>6.0</td><td>0.167</td></tr>
+            <tr><td>4</td><td>234.0 – 281.4</td><td>6</td><td>6.0</td><td>0.000</td></tr>
+            <tr><td>5</td><td>≥ 281.4</td><td>6</td><td>6.0</td><td>0.000</td></tr>
+            <tr class="total"><td>Total</td><td></td><td>30</td><td>30.0</td><td>1.000</td></tr>
+          </tbody></table>
+      </div>
+    </div>
+
+    <div class="reflect" data-reveal>
+      <div class="eyebrow">Reflection questions</div>
+      <details class="qa"><summary><span class="qn">1</span><span class="q">How should the expected distribution be justified?</span><span class="pm"></span></summary>
+        <div class="a prose"><p>It should come from a source independent of the observed counts, such as a theory or model, known population figures, earlier studies or the study design, and it should be fixed, along with the class boundaries, <em>before</em> counting. Each estimated parameter costs one degree of freedom, and expected counts should be at least 5. Choosing expected values after seeing the data makes the test circular.</p></div></details>
+      <details class="qa"><summary><span class="qn">2</span><span class="q">What does the overall goodness-of-fit result tell you?</span><span class="pm"></span></summary>
+        <div class="a prose"><p>It says whether the counts as a whole are consistent with the model. Here χ² = 1.000 (p = 0.607), so the deviations, the largest being 8 against 6 in class 2, are within chance. It does not prove normality, because power is low and binning loses information. It does not locate a misfit (cell contributions do that), it depends on the chosen classes, and it says nothing about causes.</p></div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ VERDICT ═══════════════ -->
+<section class="chapter" id="verdict">
+  <div class="wrap">
+    <div class="ch-head">
+      <div class="numeral" aria-hidden="true">✦</div>
+      <div data-reveal>
+        <div class="eyebrow">The verdict</div>
+        <h2 class="display">Five lenses, <em>one answer</em></h2>
+        <p class="intro">A player here scores 213.60 runs on average (95% CI 183.0–244.2), with spread that a normal model describes well. Role is the dominant source of variation, so role-specific figures say more than any pooled average.</p>
+      </div>
+    </div>
+    <div class="summary" data-reveal>
+      <div><div class="n">I</div><h4>Sampling</h4><p>Undocumented and quota-like. Generalise with caution.</p><div class="stat">P(10/10/10) = 0.0270</div></div>
+      <div><div class="n">II</div><h4>Estimation</h4><p>Unbiased does not mean minimum MSE, and MSE falls like 1/n.</p><div class="stat">SE = 14.96 · MSE = 223.88</div></div>
+      <div><div class="n">III</div><h4>Normality</h4><p>A normal model is plausible, and the CLT holds even for a skewed parent.</p><div class="stat">W = 0.9812 · p = 0.857</div></div>
+      <div><div class="n">IV</div><h4>ANOVA</h4><p>Mean runs differ by role, with a very large effect. Not causal.</p><div class="stat">F = 32.92 · η² = 0.709</div></div>
+      <div><div class="n">V</div><h4>Fit</h4><p>Class counts are consistent with the normal model.</p><div class="stat">χ² = 1.000 · p = 0.607</div></div>
+    </div>
+
+    <div class="block grid-2">
+      <div data-reveal>
+        <h3 class="sub">Limitations</h3>
+        <div class="prose">
+          <p><strong>Sampling</strong> is undocumented, so standard errors cover random error, not selection bias. <strong>n = 30</strong> (10 per role) gives assumption checks little power. The <strong>reference period</strong> of Runs_Scored and the scales of Fitness_Score and Practice_Hours are undocumented. The data are <strong>observational</strong>, so batting order and opportunity confound role. <strong>Resampling</strong> uses the sample as its own population.</p>
+        </div>
+      </div>
+      <div data-reveal data-d="1">
+        <h3 class="sub">Reproduce <em>everything</em></h3>
+        <pre class="code"><span class="c"># 1 · statistics, figures, tables, results.json</span>
+<span class="p">$ </span>pip install -r requirements.txt
+<span class="p">$ </span>python analysis.py
+
+<span class="c"># 2 · (optional) rebuild the PDF and this site</span>
+<span class="p">$ </span>npm install &amp;&amp; npx playwright install chromium
+<span class="p">$ </span>node tools/build.cjs</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ DOWNLOADS ═══════════════ -->
+<section class="chapter" id="downloads" style="border-bottom:0">
+  <div class="wrap">
+    <div class="eyebrow" data-reveal>Submission files</div>
+    <h2 class="display" data-reveal style="margin:22px 0 56px">Take it <em>with you</em></h2>
+    <div class="downloads">
+      <a class="card dl" href="downloads/MFAD_Datathon_Report.pdf" target="_blank" rel="noopener" data-reveal>
+        <div><div class="ext">.PDF · REPORT</div><h4>The full report</h4><p>A typeset report covering every task, with test cards, figures and all ten reflections.</p></div>
+        <div class="go">Open <span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14m0 0l-6-6m6 6l-6 6"/></svg></span></div></a>
+      <a class="card dl" href="downloads/analysis.py" download data-reveal data-d="1">
+        <div><div class="ext">.PY · CODE</div><h4>analysis.py</h4><p>One file that runs top to bottom and reproduces every number, table and plot.</p></div>
+        <div class="go">Download <span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4v12m0 0l-5-5m5 5l5-5"/></svg></span></div></a>
+      <a class="card dl" href="downloads/Dataset_13.csv" download data-reveal data-d="2">
+        <div><div class="ext">.CSV · DATA</div><h4>Dataset 13</h4><p>The 30 players exactly as supplied. Nothing was added, removed or edited.</p></div>
+        <div class="go">Download <span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4v12m0 0l-5-5m5 5l5-5"/></svg></span></div></a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="big" aria-hidden="true">Runs, Roles &amp; Randomness</div>
+    <div class="row"><span>PES University · MFAD Datathon · 2026</span><span>Python · NumPy · SciPy · Matplotlib · D3</span><a href="#top">Back to top ↑</a></div>
+  </div>
+</footer>
+
+<script src="assets/vendor/d3.v7.9.0.min.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

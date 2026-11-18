@@ -1,0 +1,17 @@
+{
+  "name": "maths-datathon",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Runs, Roles & Randomness: MFAD Datathon, Problem Statement 1, Dataset 13. Build tooling for the PDF report and website.",
+  "scripts": {
+    "analysis": "python analysis.py",
+    "build": "node tools/build.cjs",
+    "all": "python analysis.py && node tools/build.cjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
